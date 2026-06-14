@@ -33,18 +33,26 @@ function initNavScroll() {
 /* ── Mobile menu toggle ── */
 function toggleMobileMenu() {
   const links = document.getElementById('navLinks');
+  const burger = document.getElementById('navBurger');
   if (links) {
     links.classList.toggle('nav__links--open');
+  }
+  if (burger) {
+    burger.classList.toggle('nav__burger--active');
   }
 }
 
 /* Close mobile menu when clicking a link */
 function initMobileMenuClose() {
   const links = document.getElementById('navLinks');
+  const burger = document.getElementById('navBurger');
   if (!links) return;
   links.querySelectorAll('.nav__link').forEach(link => {
     link.addEventListener('click', () => {
       links.classList.remove('nav__links--open');
+      if (burger) {
+        burger.classList.remove('nav__burger--active');
+      }
     });
   });
 }

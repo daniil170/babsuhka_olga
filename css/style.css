@@ -325,7 +325,7 @@ p {
   width: 22px;
   height: 1.5px;
   background: var(--color-text);
-  transition: all var(--transition-fast);
+  transition: transform var(--transition-base), opacity var(--transition-base), background var(--transition-fast);
 }
 
 .nav--hero .nav__burger span {
@@ -334,6 +334,18 @@ p {
 
 .nav--scrolled .nav__burger span {
   background: var(--color-text);
+}
+
+.nav__burger--active span:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+
+.nav__burger--active span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav__burger--active span:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
 }
 
 /* ──────────────────────────────────
@@ -1422,10 +1434,13 @@ p {
     right: 0;
     background: rgba(245, 240, 235, 0.98);
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     flex-direction: column;
-    padding: var(--space-xl);
+    padding: var(--space-xl) var(--space-md);
     gap: var(--space-lg);
     box-shadow: var(--shadow-md);
+    align-items: center;
+    text-align: center;
   }
 
   .nav__links--open {
@@ -1436,13 +1451,58 @@ p {
     display: flex;
   }
 
+  .nav__link {
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+  }
+
+  .nav__lang {
+    margin-top: var(--space-sm);
+  }
+
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-md);
+    gap: 12px 10px;
+  }
+
+  .product-card__info {
+    padding: 12px 10px;
+  }
+
+  .product-card__name {
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+
+  .product-card__desc {
+    font-size: 0.75rem;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  .product-card__price-current {
+    font-size: 1.05rem;
+  }
+
+  .product-card__price-old {
+    font-size: 0.8rem;
+  }
+
+  .product-card__badge {
+    top: 8px;
+    left: 8px;
+    padding: 4px 8px;
+    font-size: 0.6rem;
   }
 
   .testimonials-grid {
     grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .testimonial-card {
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
   }
 
   .footer__grid {
@@ -1451,33 +1511,129 @@ p {
   }
 
   .hero {
-    height: 55vh;
-    min-height: 380px;
+    height: 50vh;
+    min-height: 340px;
+  }
+
+  .hero__logo-img {
+    width: 180px;
+    margin-bottom: var(--space-md);
+  }
+
+  .hero__title {
+    font-size: 1.85rem;
+    letter-spacing: 0.08em;
+  }
+
+  .hero__subtitle {
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
   }
 
   .care-tip {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+
+  .care-tip__icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
+  }
+
+  .care-tip__content h4 {
+    font-size: 1.05rem;
+    margin-bottom: 2px;
+  }
+
+  .care-tip__content p {
+    font-size: 0.85rem;
+    line-height: 1.6;
   }
 
   .section {
-    padding: var(--space-3xl) 0;
+    padding: var(--space-2xl) 0;
+  }
+
+  .section-header {
+    margin-bottom: var(--space-xl);
+  }
+
+  .section-header h2 {
+    font-size: 1.75rem;
+  }
+
+  .section-header p {
+    font-size: 0.95rem;
+  }
+
+  .section-divider {
+    margin: var(--space-md) auto;
   }
 
   /* Admin responsive */
   .admin-table-wrap {
     overflow-x: auto;
   }
+
+  .admin-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-md);
+    text-align: center;
+  }
+
+  .btn-add {
+    justify-content: center;
+  }
+
+  .modal {
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+  }
+
+  .form-group {
+    margin-bottom: var(--space-md);
+  }
+
+  .modal__title {
+    font-size: 1.25rem;
+    margin-bottom: var(--space-lg);
+  }
 }
 
 @media (max-width: 480px) {
   .products-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 8px;
   }
 
-  .hero__title {
-    letter-spacing: 0.06em;
+  .product-card__info {
+    padding: 8px 6px;
+  }
+
+  .product-card__name {
+    font-size: 0.85rem;
+  }
+
+  .product-card__price-current {
+    font-size: 0.95rem;
+  }
+
+  .product-card__price-old {
+    font-size: 0.75rem;
+  }
+
+  .hero__logo-img {
+    width: 140px;
+  }
+
+  .hero__cta {
+    padding: 12px 30px;
+    font-size: 0.75rem;
   }
 
   .size-options {
