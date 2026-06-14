@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru" data-lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Babushka Olga — Панель управления">
+  <title>Babushka Olga — Админ</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ════════════════════════════════
+       NAVIGATION
+       ════════════════════════════════ -->
+  <nav class="nav nav--scrolled" id="mainNav">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo-text">Babushka Olga</a>
+      <div class="nav__links" id="navLinks">
+        <a href="index.html" class="nav__link" data-i18n="nav.catalog">Каталог</a>
+        <a href="index.html#care" class="nav__link" data-i18n="nav.care">Уход</a>
+        <a href="archive.html" class="nav__link" data-i18n="nav.archive">Архив</a>
+        <a href="index.html#footer" class="nav__link" data-i18n="nav.about">О нас</a>
+        <div class="nav__lang">
+          <button class="nav__lang-btn nav__lang-btn--active" data-lang="ru" onclick="setLang('ru')">RU</button>
+          <button class="nav__lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+        </div>
+      </div>
+      <button class="nav__burger" id="navBurger" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ════════════════════════════════
+       ADMIN CONTENT
+       ════════════════════════════════ -->
+  <main class="admin-page">
+    <div class="container">
+
+      <!-- Admin Header -->
+      <div class="admin-header">
+        <h1 data-i18n="admin.title">Панель управления</h1>
+        <button class="btn-add" onclick="openAddModal()" data-i18n="admin.add">+ Добавить товар</button>
+      </div>
+
+      <!-- Admin Table -->
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th data-i18n="admin.table.photo">Фото</th>
+              <th data-i18n="admin.table.name">Название</th>
+              <th data-i18n="admin.table.price">Цена</th>
+              <th data-i18n="admin.table.discount">Скидка</th>
+              <th data-i18n="admin.table.status">Статус</th>
+              <th data-i18n="admin.table.actions">Действия</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ════════════════════════════════
+       ADD PRODUCT MODAL
+       ════════════════════════════════ -->
+  <div class="modal-overlay" id="addProductModal">
+    <div class="modal">
+      <button class="modal__close" onclick="closeAddModal()">✕</button>
+      <h3 class="modal__title" data-i18n="admin.modal.add.title">Добавить новый товар</h3>
+
+      <form id="addProductForm" onsubmit="handleAddProduct(event)">
+        <!-- Name -->
+        <div class="form-group">
+          <label data-i18n="admin.field.name">Название товара</label>
+          <input type="text" id="fieldName" placeholder="Название товара" data-i18n="admin.field.name" required>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label data-i18n="admin.field.desc">Описание</label>
+          <textarea id="fieldDesc" placeholder="Описание" data-i18n="admin.field.desc" required></textarea>
+        </div>
+
+        <!-- Price -->
+        <div class="form-group">
+          <label data-i18n="admin.field.price">Цена (₸)</label>
+          <input type="number" id="fieldPrice" placeholder="35000" min="0" required>
+        </div>
+
+        <!-- Composition -->
+        <div class="form-group">
+          <label data-i18n="admin.field.composition">Состав</label>
+          <input type="text" id="fieldComposition" placeholder="50% шерсть, 50% акрил" data-i18n="admin.field.composition">
+        </div>
+
+        <!-- Category -->
+        <div class="form-group">
+          <label data-i18n="admin.field.category">Категория</label>
+          <select id="fieldCategory" required>
+            <option value="sweater" data-i18n="category.sweater">Свитер</option>
+            <option value="vest" data-i18n="category.vest">Жилет</option>
+            <option value="poncho" data-i18n="category.poncho">Пончо</option>
+          </select>
+        </div>
+
+        <!-- Sizes -->
+        <div class="form-group">
+          <label data-i18n="product.size">Размер</label>
+          <div class="size-options">
+            <label class="size-checkbox">
+              <input type="checkbox" name="sizes" value="S"> S
+            </label>
+            <label class="size-checkbox">
+              <input type="checkbox" name="sizes" value="M"> M
+            </label>
+            <label class="size-checkbox">
+              <input type="checkbox" name="sizes" value="L"> L
+            </label>
+            <label class="size-checkbox">
+              <input type="checkbox" name="sizes" value="XL"> XL
+            </label>
+            <label class="size-checkbox">
+              <input type="checkbox" name="sizes" value="ONE SIZE"> ONE SIZE
+            </label>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit" data-i18n="admin.field.submit">Добавить</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       DISCOUNT MODAL
+       ════════════════════════════════ -->
+  <div class="modal-overlay" id="discountModal">
+    <div class="modal">
+      <button class="modal__close" onclick="closeDiscountModal()">✕</button>
+      <h3 class="modal__title" data-i18n="admin.modal.discount.title">Установить скидку</h3>
+
+      <form id="discountForm" onsubmit="handleSetDiscount(event)">
+        <!-- Discount % -->
+        <div class="form-group">
+          <label data-i18n="admin.modal.discount.label">Скидка (%)</label>
+          <input type="number" id="fieldDiscount" min="0" max="100" placeholder="15" required>
+        </div>
+
+        <!-- Hidden product ID -->
+        <input type="hidden" id="discountProductId" value="">
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit" data-i18n="admin.modal.discount.submit">Сохранить</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       TOAST NOTIFICATION
+       ════════════════════════════════ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ════════════════════════════════
+       FOOTER
+       ════════════════════════════════ -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <!-- Brand -->
+        <div>
+          <div class="footer__brand-name">Babushka Olga</div>
+          <p class="footer__brand-desc" data-i18n="footer.desc">Вязаные изделия ручной работы из Актау. Каждая вещь уникальна и создана с любовью.</p>
+        </div>
+        <!-- Navigation -->
+        <div>
+          <div class="footer__title" data-i18n="footer.nav">Навигация</div>
+          <a href="index.html" class="footer__link" data-i18n="nav.catalog">Каталог</a>
+          <a href="index.html#care" class="footer__link" data-i18n="nav.care">Уход</a>
+          <a href="archive.html" class="footer__link" data-i18n="nav.archive">Архив</a>
+        </div>
+        <!-- Contacts -->
+        <div>
+          <div class="footer__title" data-i18n="footer.contacts">Контакты</div>
+          <a href="https://wa.me/77001234567" class="footer__link">WhatsApp</a>
+          <a href="https://instagram.com/babushka.olga" class="footer__link">Instagram</a>
+          <p class="footer__link" data-i18n="footer.address">Актау, Казахстан</p>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span data-i18n="footer.rights">© 2025 Babushka Olga. Все права защищены.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ════════════════════════════════
+       SCRIPTS
+       ════════════════════════════════ -->
+  <script src="js/products.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/admin.js"></script>
+
+</body>
+</html>

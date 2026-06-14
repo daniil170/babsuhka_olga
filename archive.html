@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru" data-lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Babushka Olga — архив проданных вязаных изделий.">
+  <title>Babushka Olga — Архив</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assets/logo.jpg" type="image/jpeg">
+</head>
+<body>
+
+  <!-- ─── NAVIGATION (solid, no hero variant) ─── -->
+  <nav class="nav nav--scrolled" id="mainNav">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo-text">Babushka Olga</a>
+      <div class="nav__links" id="navLinks">
+        <a href="index.html#catalog" class="nav__link" data-i18n="nav.catalog">Каталог</a>
+        <a href="index.html#care" class="nav__link" data-i18n="nav.care">Уход</a>
+        <a href="archive.html" class="nav__link nav__link--active" data-i18n="nav.archive">Архив</a>
+        <a href="index.html#footer" class="nav__link" data-i18n="nav.about">О нас</a>
+        <div class="nav__lang">
+          <button class="nav__lang-btn nav__lang-btn--active" data-lang="ru" onclick="setLang('ru')">RU</button>
+          <button class="nav__lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+        </div>
+      </div>
+      <button class="nav__burger" id="navBurger" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ─── ARCHIVE PAGE ─── -->
+  <section class="archive-page">
+    <div class="container">
+      <div class="section-header">
+        <h2 data-i18n="archive.title">Архив</h2>
+        <span class="section-divider"></span>
+        <p data-i18n="archive.subtitle">Изделия, которые уже нашли своих хозяев</p>
+      </div>
+
+      <div class="search-bar">
+        <span class="search-bar__icon">🔍</span>
+        <input type="text" id="archiveSearch" data-i18n="archive.search" placeholder="Поиск по названию...">
+      </div>
+
+      <div class="products-grid stagger-children" id="archiveGrid">
+        <!-- Populated by JS (sold products only) -->
+      </div>
+
+      <p id="archiveEmpty" style="text-align: center; color: var(--color-text-secondary); margin-top: var(--space-2xl); display: none;" data-i18n="archive.empty">Архив пока пуст</p>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer__grid">
+
+        <!-- Brand column -->
+        <div>
+          <h3 class="footer__brand-name">Babushka Olga</h3>
+          <p class="footer__brand-desc" data-i18n="footer.desc">Вязаные изделия ручной работы из Актау. Каждая вещь уникальна и создана с любовью.</p>
+        </div>
+
+        <!-- Navigation column -->
+        <div>
+          <h4 class="footer__title" data-i18n="footer.nav">Навигация</h4>
+          <a href="index.html#catalog" class="footer__link" data-i18n="nav.catalog">Каталог</a>
+          <a href="index.html#care" class="footer__link" data-i18n="nav.care">Уход</a>
+          <a href="archive.html" class="footer__link" data-i18n="nav.archive">Архив</a>
+        </div>
+
+        <!-- Contacts column -->
+        <div>
+          <h4 class="footer__title" data-i18n="footer.contacts">Контакты</h4>
+          <a href="https://wa.me/77000000000" class="footer__link">WhatsApp</a>
+          <a href="https://instagram.com/babushka.olga" class="footer__link" target="_blank" rel="noopener">Instagram</a>
+          <p class="footer__link" data-i18n="footer.address">Актау, Казахстан</p>
+        </div>
+
+      </div>
+      <div class="footer__bottom">
+        <p data-i18n="footer.rights">© 2025 Babushka Olga. Все права защищены.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ─── TOAST ─── -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ─── SCRIPTS ─── -->
+  <script src="js/products.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

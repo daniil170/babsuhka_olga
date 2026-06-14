@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru" data-lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Babushka Olga — вязаные изделия ручной работы из Актау, Казахстан.">
+  <title>Babushka Olga — Product</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assets/logo.jpg" type="image/jpeg">
+</head>
+<body>
+
+  <!-- ─── NAVIGATION (solid, no hero variant) ─── -->
+  <nav class="nav nav--scrolled" id="mainNav">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo-text">Babushka Olga</a>
+      <div class="nav__links" id="navLinks">
+        <a href="index.html#catalog" class="nav__link" data-i18n="nav.catalog">Каталог</a>
+        <a href="index.html#care" class="nav__link" data-i18n="nav.care">Уход</a>
+        <a href="archive.html" class="nav__link" data-i18n="nav.archive">Архив</a>
+        <a href="index.html#footer" class="nav__link" data-i18n="nav.about">О нас</a>
+        <div class="nav__lang">
+          <button class="nav__lang-btn nav__lang-btn--active" data-lang="ru" onclick="setLang('ru')">RU</button>
+          <button class="nav__lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+        </div>
+      </div>
+      <button class="nav__burger" id="navBurger" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ─── PRODUCT DETAIL ─── -->
+  <section class="product-detail">
+    <div class="container">
+      <div class="product-detail__grid">
+
+        <!-- Left: Gallery -->
+        <div class="gallery">
+          <div class="gallery__main" id="galleryMain">
+            <!-- Main image populated by JS -->
+          </div>
+          <div class="gallery__thumbs" id="galleryThumbs">
+            <!-- Thumbnail images populated by JS -->
+          </div>
+        </div>
+
+        <!-- Right: Product Info -->
+        <div class="product-info">
+          <div class="product-info__breadcrumb">
+            <a href="index.html" data-i18n="product.breadcrumb.home">Главная</a>
+            <span>/</span>
+            <a href="index.html#catalog" data-i18n="product.breadcrumb.catalog">Каталог</a>
+            <span>/</span>
+            <span id="breadcrumbName">—</span>
+          </div>
+
+          <h1 class="product-info__name" id="productName">—</h1>
+
+          <div class="product-info__price" id="productPrice">
+            <!-- Price populated by JS -->
+          </div>
+
+          <p class="product-info__desc" id="productDesc">—</p>
+
+          <div class="product-info__sizes">
+            <p class="product-info__sizes-label" data-i18n="product.size">Размер</p>
+            <div class="size-options" id="sizeOptions">
+              <!-- Size buttons populated by JS -->
+            </div>
+          </div>
+
+          <button class="btn-buy" id="btnBuy" onclick="openOrderModal()" data-i18n="product.buy">Купить</button>
+
+          <a class="btn-whatsapp" id="btnWhatsapp" href="https://wa.me/77000000000" target="_blank" rel="noopener">
+            <span>💬</span>
+            <span data-i18n="product.whatsapp">Написать в WhatsApp</span>
+          </a>
+
+          <div class="product-info__details">
+            <div class="detail-row">
+              <span class="detail-row__label" data-i18n="product.composition">Состав</span>
+              <span class="detail-row__value" id="detailComposition">—</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-row__label" data-i18n="product.category">Категория</span>
+              <span class="detail-row__value" id="detailCategory">—</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-row__label" data-i18n="product.handmade">Ручная работа</span>
+              <span class="detail-row__value" data-i18n="product.yes">Да</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-row__label" data-i18n="product.delivery">Доставка</span>
+              <span class="detail-row__value" data-i18n="product.delivery.value">По всему Казахстану</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer__grid">
+
+        <!-- Brand column -->
+        <div>
+          <h3 class="footer__brand-name">Babushka Olga</h3>
+          <p class="footer__brand-desc" data-i18n="footer.desc">Вязаные изделия ручной работы из Актау. Каждая вещь уникальна и создана с любовью.</p>
+        </div>
+
+        <!-- Navigation column -->
+        <div>
+          <h4 class="footer__title" data-i18n="footer.nav">Навигация</h4>
+          <a href="index.html#catalog" class="footer__link" data-i18n="nav.catalog">Каталог</a>
+          <a href="index.html#care" class="footer__link" data-i18n="nav.care">Уход</a>
+          <a href="archive.html" class="footer__link" data-i18n="nav.archive">Архив</a>
+        </div>
+
+        <!-- Contacts column -->
+        <div>
+          <h4 class="footer__title" data-i18n="footer.contacts">Контакты</h4>
+          <a href="https://wa.me/77000000000" class="footer__link">WhatsApp</a>
+          <a href="https://instagram.com/babushka.olga" class="footer__link" target="_blank" rel="noopener">Instagram</a>
+          <p class="footer__link" data-i18n="footer.address">Актау, Казахстан</p>
+        </div>
+
+      </div>
+      <div class="footer__bottom">
+        <p data-i18n="footer.rights">© 2025 Babushka Olga. Все права защищены.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ─── ORDER MODAL ─── -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal">
+      <button class="modal__close" onclick="closeOrderModal()">&times;</button>
+      <h3 class="modal__title" data-i18n="modal.order.title">Оформить заказ</h3>
+      <form id="orderForm" onsubmit="submitOrder(event)">
+        <div class="form-group">
+          <label data-i18n="modal.order.name">Ваше имя</label>
+          <input type="text" id="orderName" required data-i18n="modal.order.name">
+        </div>
+        <div class="form-group">
+          <label data-i18n="modal.order.phone">Телефон</label>
+          <input type="tel" id="orderPhone" required data-i18n="modal.order.phone">
+        </div>
+        <div class="form-group">
+          <label data-i18n="modal.order.size">Размер</label>
+          <select id="orderSize">
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label data-i18n="modal.order.comment">Комментарий</label>
+          <textarea id="orderComment" rows="3" data-i18n="modal.order.comment"></textarea>
+        </div>
+        <button type="submit" class="btn-submit" data-i18n="modal.order.submit">Отправить заказ</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── TOAST ─── -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ─── SCRIPTS ─── -->
+  <script src="js/products.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

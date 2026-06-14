@@ -1,342 +1,231 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Babushka Olga — Вязаные изделия ручной работы премиум-класса</title>
-  <meta name="description" content="Уникальный бренд эксклюзивных вязаных свитеров, кардиганов и жилетов ручной работы от Babushka Olga. Натуральная шерсть, забота в каждой петельке, премиальный дизайн.">
-  
-  <!-- CSS Stylesheets -->
-  <link rel="stylesheet" href="/src/css/main.css">
-  <link rel="stylesheet" href="/src/css/storefront.css">
-  <link rel="stylesheet" href="/src/css/admin.css">
+  <meta name="description" content="Babushka Olga — вязаные изделия ручной работы из Актау, Казахстан. Handmade knitwear from Aktau, Kazakhstan.">
+  <title>Babushka Olga — Handmade Knitwear</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assets/logo.jpg" type="image/jpeg">
 </head>
 <body>
 
-  <!-- Header & Navigation -->
-  <header id="siteHeader">
-    <div class="nav-container">
-      <a href="#" class="logo-wrapper" id="brandLogoLink">
-        <img src="/logo.png" alt="Логотип Babushka Olga" class="logo-img" id="headerLogoImg">
-        <span class="logo-text" id="headerLogoText">Babushka Olga</span>
-      </a>
-      <nav aria-label="Основное меню">
-        <ul class="nav-links" id="navigationList">
-          <li class="active" data-view="storefront" id="navItemStorefront"><a>Магазин</a></li>
-          <li data-view="archive" id="navItemArchive"><a>Архив</a></li>
-          <li data-view="admin" id="navItemAdmin"><a>Админка</a></li>
-        </ul>
-      </nav>
+  <!-- ─── NAVIGATION ─── -->
+  <nav class="nav nav--hero" id="mainNav">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo-text">Babushka Olga</a>
+      <div class="nav__links" id="navLinks">
+        <a href="#catalog" class="nav__link" data-i18n="nav.catalog">Каталог</a>
+        <a href="#care" class="nav__link" data-i18n="nav.care">Уход</a>
+        <a href="archive.html" class="nav__link" data-i18n="nav.archive">Архив</a>
+        <a href="#footer" class="nav__link" data-i18n="nav.about">О нас</a>
+        <div class="nav__lang">
+          <button class="nav__lang-btn nav__lang-btn--active" data-lang="ru" onclick="setLang('ru')">RU</button>
+          <button class="nav__lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+        </div>
+      </div>
+      <button class="nav__burger" id="navBurger" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </button>
     </div>
-  </header>
+  </nav>
 
-  <!-- Main View Container -->
-  <main id="mainContent">
-
-    <!-- VIEW: STOREFRONT -->
-    <section id="viewStorefront" class="animate-fade-in">
-      <!-- Fullscreen Hero Banner with background video -->
-      <div class="hero" id="heroBanner">
-        <video id="heroVideoBg" autoplay loop muted playsinline class="hero-video-bg">
-          <source id="heroVideoSource" src="" type="video/mp4">
-          Ваш браузер не поддерживает видео.
-        </video>
-        <div class="hero-overlay" id="heroVideoOverlay"></div>
-        <div class="hero-content" id="heroTextContent">
-          <h1 class="hero-title" id="mainStoreTitle">Babushka Olga</h1>
-          <p class="hero-subtitle" id="mainStoreSubtitle">Эксклюзивные вязаные изделия ручной работы, созданные с заботой и теплом.</p>
-          <a href="#catalogSection" class="btn-primary" id="btnExploreCatalog">Смотреть коллекцию</a>
-        </div>
-      </div>
-
-      <!-- Active Catalog Showcase -->
-      <div class="section" id="catalogSection">
-        <h2 class="section-title" id="catalogTitle">Наша Коллекция</h2>
-        <p class="section-subtitle" id="catalogSubtitle">Каждое изделие связано полностью вручную из пряжи высочайшего качества. В единственном экземпляре.</p>
-        <div class="products-grid" id="productsGrid">
-          <!-- Catalog items will be injected here via catalog.js -->
-        </div>
-      </div>
-    </section>
-
-    <!-- VIEW: ARCHIVE -->
-    <section id="viewArchive" class="section animate-fade-in" style="display: none;">
-      <h2 class="section-title" id="archiveTitle">Архив Изделий</h2>
-      <p class="section-subtitle" id="archiveSubtitle">Наши творения, которые уже нашли своих владельцев и дарят тепло по всему миру.</p>
-      <div class="products-grid" id="archiveGrid">
-        <!-- Archived items will be injected here via catalog.js -->
-      </div>
-    </section>
-
-    <!-- VIEW: ADMIN PANEL -->
-    <section id="viewAdmin" class="section animate-fade-in" style="display: none;">
-      <div class="admin-panel" id="adminPanelDashboard">
-        
-        <!-- Header & Action Row -->
-        <div class="admin-header-row" id="adminHeaderContainer">
-          <div class="admin-title-group" id="adminTitleInfo">
-            <h2>Панель управления</h2>
-            <p>Управление наполнением каталога, архивом и оформлением сайта</p>
-          </div>
-          <button class="btn-primary" id="btnOpenAddProduct">Добавить товар</button>
-        </div>
-
-        <!-- Dashboard Stats Widget Grid -->
-        <div class="admin-stats" id="dashboardStatsRow">
-          <div class="stat-card" id="widgetTotalProducts">
-            <span class="stat-label">Всего товаров</span>
-            <span class="stat-number" id="statTotalProducts">0</span>
-            <span class="stat-trend">В базе данных</span>
-          </div>
-          <div class="stat-card" id="widgetActiveProducts">
-            <span class="stat-label">В наличии</span>
-            <span class="stat-number" id="statActiveProducts">0</span>
-            <span class="stat-trend" style="color: var(--color-success);">Отображаются на сайте</span>
-          </div>
-          <div class="stat-card" id="widgetSoldProducts">
-            <span class="stat-label">Продано (в архиве)</span>
-            <span class="stat-number" id="statSoldProducts">0</span>
-            <span class="stat-trend" style="color: var(--text-light);">Перенесены в архив</span>
-          </div>
-        </div>
-
-        <!-- Settings Cards: Background Video URL -->
-        <div class="admin-settings-section" id="siteSettingsContainer">
-          <h3 class="admin-settings-title" id="videoSettingTitle">Оформление сайта</h3>
-          <div class="form-group" id="videoFormGroup">
-            <label for="videoUrlInput">Ссылка на фоновое видео (.mp4)</label>
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-              <input type="url" id="videoUrlInput" class="form-control" style="flex-grow: 1;" placeholder="Вставьте прямую ссылку на mp4 файл">
-              <button class="btn-primary" id="btnSaveVideo" style="padding: 12px 24px;">Обновить видео</button>
-            </div>
-            <span style="font-size: 0.8rem; color: var(--text-light); margin-top: 4px;">Рекомендуется использовать короткие зацикленные видеоролики без звука размером до 5-10 МБ для быстрой загрузки.</span>
-          </div>
-        </div>
-
-        <!-- Inventory Database Table Card -->
-        <div class="inventory-section" id="inventoryTableWrapper">
-          <div class="inventory-header" id="inventoryHeaderContainer">
-            <h3>Список товаров</h3>
-          </div>
-          <div class="table-responsive" id="adminTableScrollWrapper">
-            <table class="admin-table" id="adminInventoryTable">
-              <thead>
-                <tr>
-                  <th scope="col">Название товара</th>
-                  <th scope="col">Цена</th>
-                  <th scope="col">Статус товара</th>
-                  <th scope="col">Действия</th>
-                </tr>
-              </thead>
-              <tbody id="adminInventoryTableBody">
-                <!-- Inventory rows will be injected here via admin.js -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Care Instructions Modal (Declarative light-dismiss closedby="any") -->
-  <dialog id="careInstructionsModal" class="care-modal" closedby="any" aria-labelledby="careModalTitle">
-    <div class="modal-header" id="careModalHeader">
-      <h3 class="modal-title" id="careModalTitle">Правила ухода за вещами</h3>
-      <button class="modal-close" aria-label="Закрыть модальное окно" id="btnCloseCareModal">&times;</button>
+  <!-- ─── HERO SECTION ─── -->
+  <section class="hero">
+    <video class="hero__video" autoplay muted loop playsinline poster="assets/logo.jpg" src="assets/hero-video.mp4"></video>
+    <div class="hero__placeholder"></div>
+    <div class="hero__overlay"></div>
+    <div class="hero__content">
+      <img src="assets/logo.jpg" alt="Babushka Olga" class="hero__logo-img" style="filter: brightness(0) invert(1);">
+      <p class="hero__subtitle" data-i18n="hero.subtitle">Вязаные изделия ручной работы · Актау</p>
+      <a href="#catalog" class="hero__cta" data-i18n="hero.cta">Смотреть каталог</a>
     </div>
-    <div class="modal-content" id="careModalBody">
-      <!-- Tabs Navigation -->
-      <div class="modal-tabs" id="careModalTabsList">
-        <button class="modal-tab-btn active" data-tab="washing" id="tabBtnWashing">Стирка</button>
-        <button class="modal-tab-btn" data-tab="drying" id="tabBtnDrying">Сушка</button>
-        <button class="modal-tab-btn" data-tab="storage" id="tabBtnStorage">Хранение</button>
-      </div>
+  </section>
 
-      <!-- Tab 1: Washing -->
-      <div class="modal-tab-content active" id="care-tab-washing">
-        <h4>Деликатная ручная стирка</h4>
-        <ul>
-          <li>Стирайте изделия только **вручную** в прохладной воде (не более 30°C).</li>
-          <li>Используйте специальные жидкие средства для стирки шерсти, кашемира или шелка.</li>
-          <li>Ни в коем случае не трите и не выкручивайте вещь, аккуратно сжимайте её для удаления загрязнений.</li>
-          <li>Для удаления лишней влаги заверните изделие в сухое махровое полотенце и слегка отожмите.</li>
-        </ul>
-        <div class="modal-note">
-          <strong>Внимание!</strong> Никогда не используйте стиральную машину (даже в режиме "шерсть") и обычные порошки с отбеливателями.
-        </div>
+  <!-- ─── CATALOG SECTION ─── -->
+  <section class="section" id="catalog">
+    <div class="container">
+      <div class="section-header">
+        <h2 data-i18n="catalog.title">Каталог</h2>
+        <span class="section-divider"></span>
+        <p data-i18n="catalog.subtitle">Каждое изделие связано вручную с любовью и заботой</p>
       </div>
-
-      <!-- Tab 2: Drying -->
-      <div class="modal-tab-content" id="care-tab-drying">
-        <h4>Горизонтальная сушка</h4>
-        <ul>
-          <li>Сушите изделия исключительно в **горизонтальном положении** на плоской поверхности.</li>
-          <li>Разложите вещь на сухом махровом полотенце, придав ей правильную первоначальную форму.</li>
-          <li>Меняйте полотенце по мере его намокания, чтобы ускорить процесс высыхания.</li>
-          <li>Сушите вдали от прямых солнечных лучей и отопительных приборов.</li>
-        </ul>
-        <div class="modal-note">
-          <strong>Внимание!</strong> Никогда не вешайте мокрые вязаные вещи на плечики или бельевую веревку — под тяжестью воды они безвозвратно деформируются и растянутся.
-        </div>
-      </div>
-
-      <!-- Tab 3: Storage -->
-      <div class="modal-tab-content" id="care-tab-storage">
-        <h4>Правильное хранение</h4>
-        <ul>
-          <li>Храните вязаные вещи только в **сложенном виде** на полках в шкафу.</li>
-          <li>Не вешайте трикотажные изделия на вешалки (плечики), чтобы избежать вытягивания плечевых швов.</li>
-          <li>Используйте натуральные средства защиты от моли (саше с лавандой, кедром).</li>
-          <li>Периодически проветривайте полки шкафа и давайте вещам «отдыхать» после носки.</li>
-        </ul>
-        <div class="modal-note">
-          <strong>Совет:</strong> Если на изделии появились катышки, удаляйте их специальной машинкой или аккуратно вручную, не вытягивая нити.
-        </div>
+      <div class="products-grid stagger-children" id="productsGrid">
+        <!-- Populated by JS -->
       </div>
     </div>
-  </dialog>
+  </section>
 
-  <!-- Add/Edit Product Modal -->
-  <dialog id="productModal" class="product-modal" aria-labelledby="modalHeaderTitle">
-    <div class="modal-header" id="productModalHeader">
-      <h3 class="modal-title" id="modalHeaderTitle">Добавить новый товар</h3>
-      <button class="modal-close" aria-label="Закрыть модальное окно" id="btnCancelProductModalClose">&times;</button>
-    </div>
-    <form id="productForm">
-      <div class="modal-content" id="productModalBody">
-        
-        <!-- Row 1: Name and Price -->
-        <div class="form-row">
-          <div class="form-group">
-            <label for="productName">Название товара *</label>
-            <input type="text" id="productName" class="form-control" required placeholder="Например: Свитер оверсайз">
-          </div>
-          <div class="form-group">
-            <label for="productPrice">Цена (₽) *</label>
-            <input type="number" id="productPrice" class="form-control" required min="0" placeholder="12500">
+  <!-- ─── CARE SECTION ─── -->
+  <section class="section care-section" id="care">
+    <div class="container">
+      <div class="section-header">
+        <h2 data-i18n="care.title">Уход за вязаными изделиями</h2>
+        <span class="section-divider"></span>
+        <p data-i18n="care.subtitle">Правильный уход продлит жизнь вашему любимому свитеру на многие годы</p>
+      </div>
+      <div class="care-article">
+
+        <!-- Tip 1: Wash -->
+        <div class="care-tip fade-in">
+          <div class="care-tip__icon">🫧</div>
+          <div class="care-tip__content">
+            <h4 data-i18n="care.wash.title">Стирка</h4>
+            <p data-i18n="care.wash.text">Стирайте вручную в прохладной воде (30°C) с мягким моющим средством. Не используйте отбеливатель. Избегайте машинной стирки — она может деформировать изделие.</p>
           </div>
         </div>
 
-        <!-- Row 2: Status and Description -->
-        <div class="form-row" style="margin-top: 16px;">
-          <div class="form-group">
-            <label for="productStatus">Статус доступности *</label>
-            <select id="productStatus" class="form-control" required>
-              <option value="in_stock">В наличии</option>
-              <option value="running_low">Скоро закончится</option>
-              <option value="sold">Продано (уходит в архив)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Доступные размеры</label>
-            <div class="sizes-grid">
-              <div class="size-checkbox-wrapper">
-                <input type="checkbox" id="sizeS" name="sizes" value="S">
-                <label for="sizeS" class="size-checkbox-label">S</label>
-              </div>
-              <div class="size-checkbox-wrapper">
-                <input type="checkbox" id="sizeM" name="sizes" value="M">
-                <label for="sizeM" class="size-checkbox-label">M</label>
-              </div>
-              <div class="size-checkbox-wrapper">
-                <input type="checkbox" id="sizeL" name="sizes" value="L">
-                <label for="sizeL" class="size-checkbox-label">L</label>
-              </div>
-              <div class="size-checkbox-wrapper">
-                <input type="checkbox" id="sizeXL" name="sizes" value="XL">
-                <label for="sizeXL" class="size-checkbox-label">XL</label>
-              </div>
-              <div class="size-checkbox-wrapper">
-                <input type="checkbox" id="sizeOS" name="sizes" value="OS (One Size)">
-                <label for="sizeOS" class="size-checkbox-label">OS</label>
-              </div>
-            </div>
+        <!-- Tip 2: Dry -->
+        <div class="care-tip fade-in">
+          <div class="care-tip__icon">☀️</div>
+          <div class="care-tip__content">
+            <h4 data-i18n="care.dry.title">Сушка</h4>
+            <p data-i18n="care.dry.text">Не отжимайте — аккуратно удалите лишнюю воду, промокнув изделие полотенцем. Сушите горизонтально на ровной поверхности вдали от прямых солнечных лучей.</p>
           </div>
         </div>
 
-        <!-- Description -->
-        <div class="form-group" style="margin-top: 16px;">
-          <label for="productDescription">Описание товара</label>
-          <textarea id="productDescription" class="form-control" placeholder="Подробное описание пряжи, фасона, кроя и ощущений от изделия..."></textarea>
-        </div>
-
-        <!-- Image Input Fields (URLs & Local File Uploads) -->
-        <div class="form-group" style="margin-top: 20px;">
-          <label>Изображения товара (Всего 3 варианта фото)</label>
-          <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 12px; margin-top: -4px;">
-            Вы можете загрузить файл с компьютера ИЛИ указать ссылку на картинку в интернете.
-          </p>
-          
-          <div class="images-input-row">
-            <!-- Image 1 -->
-            <div style="border: 1px solid var(--color-border); padding: 12px; border-radius: var(--radius-sm); background: #fff;">
-              <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-secondary); display: block; margin-bottom: 6px;">ФОТО 1 (Главная обложка карточки)</span>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center;">
-                <input type="file" id="productImageFile1" accept="image/*" class="form-control" style="font-size: 0.8rem; padding: 6px 12px;">
-                <input type="url" id="productImageUrl1" class="form-control" placeholder="Ссылка на изображение" style="font-size: 0.85rem; padding: 8px 12px;">
-              </div>
-            </div>
-
-            <!-- Image 2 -->
-            <div style="border: 1px solid var(--color-border); padding: 12px; border-radius: var(--radius-sm); background: #fff;">
-              <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-secondary); display: block; margin-bottom: 6px;">ФОТО 2 (Вторая вкладка/деталь)</span>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center;">
-                <input type="file" id="productImageFile2" accept="image/*" class="form-control" style="font-size: 0.8rem; padding: 6px 12px;">
-                <input type="url" id="productImageUrl2" class="form-control" placeholder="Ссылка на изображение" style="font-size: 0.85rem; padding: 8px 12px;">
-              </div>
-            </div>
-
-            <!-- Image 3 -->
-            <div style="border: 1px solid var(--color-border); padding: 12px; border-radius: var(--radius-sm); background: #fff;">
-              <span style="font-size: 0.8rem; font-weight: bold; color: var(--text-secondary); display: block; margin-bottom: 6px;">ФОТО 3 (Третья вкладка/крупный план текстуры)</span>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center;">
-                <input type="file" id="productImageFile3" accept="image/*" class="form-control" style="font-size: 0.8rem; padding: 6px 12px;">
-                <input type="url" id="productImageUrl3" class="form-control" placeholder="Ссылка на изображение" style="font-size: 0.85rem; padding: 8px 12px;">
-              </div>
-            </div>
+        <!-- Tip 3: Storage -->
+        <div class="care-tip fade-in">
+          <div class="care-tip__icon">📦</div>
+          <div class="care-tip__content">
+            <h4 data-i18n="care.store.title">Хранение</h4>
+            <p data-i18n="care.store.text">Храните вязаные вещи сложенными, а не на вешалке — так они не растянутся. Используйте мешочки с лавандой для защиты от моли.</p>
           </div>
         </div>
 
-      </div>
-      <div class="modal-footer" id="productModalFooter">
-        <button type="button" class="btn-secondary" id="btnCancelProduct" style="padding: 12px 24px;">Отмена</button>
-        <button type="submit" class="btn-primary" id="btnSubmitProduct" style="padding: 12px 24px;">Сохранить</button>
-      </div>
-    </form>
-  </dialog>
+        <!-- Tip 4: Iron -->
+        <div class="care-tip fade-in">
+          <div class="care-tip__icon">🔥</div>
+          <div class="care-tip__content">
+            <h4 data-i18n="care.iron.title">Глажка</h4>
+            <p data-i18n="care.iron.text">Если необходимо, используйте отпариватель или утюг на минимальной температуре через влажную ткань. Не прижимайте сильно — это может примять петли.</p>
+          </div>
+        </div>
 
-  <!-- Footer -->
-  <footer id="siteFooter">
-    <div class="footer-content">
-      <div class="footer-brand" id="footerBrandContainer">
-        <h4>Babushka Olga</h4>
-        <p>Создание вязаной одежды премиум-класса полностью вручную. Одеваем вас в тепло и любовь с заботой о природе.</p>
-      </div>
-      <div class="footer-links" id="footerLinksContainer">
-        <h5>Разделы сайта</h5>
-        <ul>
-          <li><a href="#" onclick="document.getElementById('navItemStorefront').click();">Каталог магазина</a></li>
-          <li><a href="#" onclick="document.getElementById('navItemArchive').click();">Архив проданного</a></li>
-          <li><a href="#" onclick="document.getElementById('navItemAdmin').click();">Администратор</a></li>
-          <li><a href="#" onclick="document.getElementById('careInstructionsModal').showModal();">Правила ухода</a></li>
-        </ul>
-      </div>
-      <div class="footer-contact" id="footerContactContainer">
-        <h5>Контакты</h5>
-        <p>📍 Москва, ул. Большая Никитская, 24</p>
-        <p>📞 +7 (999) 123-45-67</p>
-        <p>✉️ info@babushka-olga.ru</p>
+        <!-- Tip 5: Pilling -->
+        <div class="care-tip fade-in">
+          <div class="care-tip__icon">✨</div>
+          <div class="care-tip__content">
+            <h4 data-i18n="care.pilling.title">Катышки</h4>
+            <p data-i18n="care.pilling.text">Небольшие катышки — естественное свойство натуральной пряжи. Удаляйте их специальной машинкой или вручную. Со временем они появляются реже.</p>
+          </div>
+        </div>
+
       </div>
     </div>
-    <div class="footer-bottom" id="footerCopyrightContainer">
-      <p>&copy; 2026 Babushka Olga. Все права защищены.</p>
-      <p>Создано вручную с любовью 🧶</p>
+  </section>
+
+  <!-- ─── TESTIMONIALS SECTION ─── -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 data-i18n="testimonials.title">Благодарности</h2>
+        <span class="section-divider"></span>
+        <p data-i18n="testimonials.subtitle">Что говорят наши клиенты</p>
+      </div>
+      <div class="testimonials-grid">
+
+        <!-- Testimonial 1 -->
+        <div class="testimonial-card fade-in">
+          <div class="testimonial-card__quote">"</div>
+          <p class="testimonial-card__text" data-i18n="testimonial.1.text">Получила свитер от Бабушки Ольги — это невероятно! Такого качества ручной работы я давно не видела. Каждая петелька сделана с душой.</p>
+          <p class="testimonial-card__author" data-i18n="testimonial.1.author">Айгуль К.</p>
+          <p class="testimonial-card__city" data-i18n="testimonial.1.city">Алматы</p>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="testimonial-card fade-in">
+          <div class="testimonial-card__quote">"</div>
+          <p class="testimonial-card__text" data-i18n="testimonial.2.text">Заказала жилет в подарок маме — она в восторге! Цвета яркие, вязка плотная. Видно, что сделано с любовью. Спасибо, Ольга!</p>
+          <p class="testimonial-card__author" data-i18n="testimonial.2.author">Дана М.</p>
+          <p class="testimonial-card__city" data-i18n="testimonial.2.city">Актау</p>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="testimonial-card fade-in">
+          <div class="testimonial-card__quote">"</div>
+          <p class="testimonial-card__text" data-i18n="testimonial.3.text">Пончо «Каспий» — моя любимая вещь для прогулок по набережной. Тёплое, стильное и единственное в своём роде. Все спрашивают, где купила!</p>
+          <p class="testimonial-card__author" data-i18n="testimonial.3.author">Мария С.</p>
+          <p class="testimonial-card__city" data-i18n="testimonial.3.city">Астана</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer__grid">
+
+        <!-- Brand column -->
+        <div>
+          <h3 class="footer__brand-name">Babushka Olga</h3>
+          <p class="footer__brand-desc" data-i18n="footer.desc">Вязаные изделия ручной работы из Актау. Каждая вещь уникальна и создана с любовью.</p>
+        </div>
+
+        <!-- Navigation column -->
+        <div>
+          <h4 class="footer__title" data-i18n="footer.nav">Навигация</h4>
+          <a href="#catalog" class="footer__link" data-i18n="nav.catalog">Каталог</a>
+          <a href="#care" class="footer__link" data-i18n="nav.care">Уход</a>
+          <a href="archive.html" class="footer__link" data-i18n="nav.archive">Архив</a>
+        </div>
+
+        <!-- Contacts column -->
+        <div>
+          <h4 class="footer__title" data-i18n="footer.contacts">Контакты</h4>
+          <a href="https://wa.me/77000000000" class="footer__link">WhatsApp</a>
+          <a href="https://instagram.com/babushka.olga" class="footer__link" target="_blank" rel="noopener">Instagram</a>
+          <p class="footer__link" data-i18n="footer.address">Актау, Казахстан</p>
+        </div>
+
+      </div>
+      <div class="footer__bottom">
+        <p data-i18n="footer.rights">© 2025 Babushka Olga. Все права защищены.</p>
+      </div>
     </div>
   </footer>
 
-  <!-- Entry Script Module -->
-  <script type="module" src="/src/js/main.js" id="entryScriptModule"></script>
+  <!-- ─── ORDER MODAL ─── -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal">
+      <button class="modal__close" onclick="closeOrderModal()">&times;</button>
+      <h3 class="modal__title" data-i18n="modal.order.title">Оформить заказ</h3>
+      <form id="orderForm" onsubmit="submitOrder(event)">
+        <div class="form-group">
+          <label data-i18n="modal.order.name">Ваше имя</label>
+          <input type="text" id="orderName" required data-i18n="modal.order.name">
+        </div>
+        <div class="form-group">
+          <label data-i18n="modal.order.phone">Телефон</label>
+          <input type="tel" id="orderPhone" required data-i18n="modal.order.phone">
+        </div>
+        <div class="form-group">
+          <label data-i18n="modal.order.size">Размер</label>
+          <select id="orderSize">
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label data-i18n="modal.order.comment">Комментарий</label>
+          <textarea id="orderComment" rows="3" data-i18n="modal.order.comment"></textarea>
+        </div>
+        <button type="submit" class="btn-submit" data-i18n="modal.order.submit">Отправить заказ</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── TOAST ─── -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ─── SCRIPTS ─── -->
+  <script src="js/products.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/app.js"></script>
+
 </body>
 </html>
