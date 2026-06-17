@@ -45,8 +45,7 @@ export function addToCart(product, size) {
     cart.push({
       productId: product.id,
       name: product.name, // { ru, en }
-      emoji: product.emoji || '🧶',
-      color: product.color || '#c4b49e',
+      image: (product.images && product.images[0]) || '',
       price: product.price,
       size: size,
       quantity: 1

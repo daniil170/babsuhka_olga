@@ -3,7 +3,8 @@ import {
   saveProduct, deleteProduct, setMaintenanceMode, 
   subscribeOrders, updateOrderStatus, subscribeProducts,
   loginAdmin, logoutAdmin, subscribeAuthState,
-  registerAdmin, resetAdminPassword
+  registerAdmin, resetAdminPassword, updateHeroVideo,
+  subscribeHeroVideo
 } from './firebase.js';
 import { uploadMedia } from './cloudinary.js';
 
@@ -12,6 +13,7 @@ let currentAdminUser = null;
 let currentMaintenanceState = false;
 let orderSubscriptionUnsubscribe = null;
 let authMode = 'login';
+let currentHeroVideoUrl = '';
 
 // DOM Elements cache
 let elements = {};
@@ -32,6 +34,20 @@ export function initAdminPanel() {
     if (elements.adminPanel && elements.adminPanel.classList.contains('open')) {
       renderAdminProducts();
       renderAdminArchive();
+    }
+  });
+
+  // Subscribe to Hero Video for admin buttons state
+  subscribeHeroVideo((url) => {
+    currentHeroVideoUrl = url;
+    if (elements.heroVideoPreviewBtn && elements.heroVideoDeleteBtn) {
+      if (url) {
+        elements.heroVideoPreviewBtn.style.display = 'inline-block';
+        elements.heroVideoDeleteBtn.style.display = 'inline-block';
+      } else {
+        elements.heroVideoPreviewBtn.style.display = 'none';
+        elements.heroVideoDeleteBtn.style.display = 'none';
+      }
     }
   });
 }
@@ -72,13 +88,17 @@ function cacheElements() {
     fPrice: document.getElementById('f-price'),
     fStatus: document.getElementById('f-status'),
     fSizes: document.getElementById('f-sizes'),
-    fEmoji: document.getElementById('f-emoji'),
     fDescRu: document.getElementById('f-desc-ru'),
     fDescEn: document.getElementById('f-desc-en'),
-    fColor: document.getElementById('f-color'),
     
     // Maintenance
     maintenanceBtn: document.getElementById('admin-maintenance-toggle'),
+    
+    // Hero Video Controls
+    heroVideoPreviewBtn: document.getElementById('admin-hero-video-preview-btn'),
+    heroVideoDeleteBtn: document.getElementById('admin-hero-video-delete-btn'),
+    heroVideoPreviewModal: document.getElementById('hero-video-preview-modal'),
+    heroVideoPreviewPlayer: document.getElementById('hero-video-preview-player'),
     
     // Orders
     ordersTbody: document.getElementById('admin-orders-tbody')
@@ -162,6 +182,73 @@ function setupEventListeners() {
 
   // File Upload Handlers for Product Form
   setupFileUploads();
+
+  // Setup Global Hero Video Upload Listener
+  const heroVideoInput = document.getElementById('upload-hero-video');
+  if (heroVideoInput) {
+    heroVideoInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const progressDiv = document.getElementById('hero-video-progress');
+      const btn = document.getElementById('admin-hero-video-btn');
+      if (progressDiv) {
+        progressDiv.style.display = 'block';
+        progressDiv.textContent = '0%';
+      }
+      if (btn) btn.disabled = true;
+
+      try {
+        const secureUrl = await uploadMedia(file, 'video', (percent) => {
+          if (progressDiv) progressDiv.textContent = `${percent}%`;
+        });
+        
+        await updateHeroVideo(secureUrl);
+        window.showToast('Hero-видео успешно загружено и обновлено!');
+      } catch (err) {
+        console.error(err);
+        window.showToast('Ошибка загрузки Hero-видео');
+      } finally {
+        if (progressDiv) {
+          progressDiv.style.display = 'none';
+          progressDiv.textContent = '0%';
+        }
+        if (btn) btn.disabled = false;
+        heroVideoInput.value = '';
+      }
+    });
+  }
+
+  // Hero Video Preview Handler
+  if (elements.heroVideoPreviewBtn) {
+    elements.heroVideoPreviewBtn.onclick = () => {
+      if (elements.heroVideoPreviewPlayer && currentHeroVideoUrl) {
+        elements.heroVideoPreviewPlayer.src = currentHeroVideoUrl;
+        elements.heroVideoPreviewPlayer.load();
+        elements.heroVideoPreviewPlayer.play().catch(err => {
+          console.warn('Preview video play blocked or failed:', err);
+        });
+      }
+      if (elements.heroVideoPreviewModal) {
+        elements.heroVideoPreviewModal.classList.add('open');
+      }
+    };
+  }
+
+  // Hero Video Delete Handler
+  if (elements.heroVideoDeleteBtn) {
+    elements.heroVideoDeleteBtn.onclick = async () => {
+      if (confirm('Вы уверены, что хотите удалить текущее Hero-видео?')) {
+        try {
+          await updateHeroVideo('');
+          window.showToast('Hero-видео успешно удалено!');
+        } catch (err) {
+          console.error(err);
+          window.showToast('Ошибка при удалении Hero-видео');
+        }
+      }
+    };
+  }
 }
 
 function updateAdminUIForAuth() {
@@ -230,6 +317,17 @@ export function closeAdminPanel() {
   }
 }
 
+export function closeHeroVideoPreviewModal() {
+  if (elements.heroVideoPreviewModal) {
+    elements.heroVideoPreviewModal.classList.remove('open');
+  }
+  if (elements.heroVideoPreviewPlayer) {
+    elements.heroVideoPreviewPlayer.pause();
+    elements.heroVideoPreviewPlayer.src = '';
+  }
+}
+window.closeHeroVideoPreviewModal = closeHeroVideoPreviewModal;
+
 window.openAdmin = openAdminPanel;
 window.closeAdmin = closeAdminPanel;
 window.closeLoginModal = closeLoginModal;
@@ -261,16 +359,12 @@ window.switchAdminTab = switchAdminTab;
 // ── 3. PRODUCT FORM & FILE UPLOADS ──
 
 function setupFileUploads() {
-  // Setup slots for 3 photos and 1 video
+  // Setup slots for 3 photos
   for (let i = 1; i <= 3; i++) {
     const slot = document.getElementById(`upload-photo-${i}`);
     if (slot) {
       slot.addEventListener('change', (e) => handleFileSelect(e, 'photo', i));
     }
-  }
-  const videoSlot = document.getElementById('upload-video');
-  if (videoSlot) {
-    videoSlot.addEventListener('change', (e) => handleFileSelect(e, 'video'));
   }
 }
 
@@ -289,7 +383,7 @@ async function handleFileSelect(event, type, index = null) {
   try {
     const secureUrl = await uploadMedia(
       file, 
-      type === 'video' ? 'video' : 'image',
+      'image',
       (percent) => {
         if (progressBar) progressBar.style.width = `${percent}%`;
       }
@@ -300,20 +394,11 @@ async function handleFileSelect(event, type, index = null) {
     
     // Update visual preview
     if (previewImg) {
-      if (type === 'video') {
-        // Show video thumbnail or simple label
-        previewImg.src = '';
-        const icon = slotElement.querySelector('.media-slot-icon');
-        if (icon) icon.textContent = '🎥';
-        const label = slotElement.querySelector('.media-slot-label');
-        if (label) label.textContent = 'Видео загружено';
-      } else {
-        previewImg.src = secureUrl;
-        previewImg.style.display = 'block';
-      }
+      previewImg.src = secureUrl;
+      previewImg.style.display = 'block';
     }
     
-    window.showToast(type === 'video' ? 'Видео загружено' : `Фото ${index} загружено`);
+    window.showToast(`Фото ${index} загружено`);
   } catch (err) {
     console.error(err);
     window.showToast('Ошибка загрузки медиа');
@@ -329,8 +414,6 @@ export async function saveProductSubmit() {
   const price = parseInt(elements.fPrice.value) || 0;
   const status = elements.fStatus.value;
   const sizes = elements.fSizes.value.split(',').map(s => s.trim()).filter(Boolean);
-  const emoji = elements.fEmoji.value.trim() || '🧶';
-  const color = elements.fColor.value.trim() || '#c4b49e';
   const descRu = elements.fDescRu.value.trim();
   const descEn = elements.fDescEn.value.trim();
 
@@ -345,14 +428,8 @@ export async function saveProductSubmit() {
     const slot = document.getElementById(`media-slot-photo-${i}`);
     if (slot && slot.dataset.uploadedUrl) {
       images.push(slot.dataset.uploadedUrl);
-    } else {
-      // Fallback default emoji representation if no images uploaded
-      images.push(emoji);
     }
   }
-
-  const videoSlot = document.getElementById('media-slot-video');
-  const videoUrl = videoSlot ? (videoSlot.dataset.uploadedUrl || '') : '';
 
   const productData = {
     name: { ru: nameRu, en: nameEn },
@@ -361,10 +438,7 @@ export async function saveProductSubmit() {
     price,
     status,
     sizes,
-    emoji,
-    color,
-    images,
-    videoUrl
+    images
   };
 
   const id = elements.editId.value;
@@ -395,8 +469,6 @@ export function editProduct(id) {
   elements.fPrice.value = p.price || '';
   elements.fStatus.value = p.status || 'available';
   elements.fSizes.value = (p.sizes || []).join(', ');
-  elements.fEmoji.value = p.emoji || '🧶';
-  elements.fColor.value = p.color || '';
   elements.fDescRu.value = p.desc.ru || '';
   elements.fDescEn.value = p.desc.en || '';
 
@@ -410,7 +482,6 @@ export function editProduct(id) {
       if (progress) progress.style.width = '0%';
       const imgUrl = p.images && p.images[i-1] ? p.images[i-1] : '';
       
-      // If image is a valid URL (not just emoji placeholder)
       if (imgUrl && imgUrl.startsWith('http')) {
         slot.dataset.uploadedUrl = imgUrl;
         if (previewImg) {
@@ -424,26 +495,6 @@ export function editProduct(id) {
           previewImg.style.display = 'none';
         }
       }
-    }
-  }
-
-  const videoSlot = document.getElementById('media-slot-video');
-  const videoPreview = videoSlot ? videoSlot.querySelector('.media-slot-preview') : null;
-  const videoProgress = videoSlot ? videoSlot.querySelector('.media-slot-progress') : null;
-  
-  if (videoSlot) {
-    if (videoProgress) videoProgress.style.width = '0%';
-    const videoLabel = videoSlot.querySelector('.media-slot-label');
-    const videoIcon = videoSlot.querySelector('.media-slot-icon');
-
-    if (p.videoUrl) {
-      videoSlot.dataset.uploadedUrl = p.videoUrl;
-      if (videoIcon) videoIcon.textContent = '🎥';
-      if (videoLabel) videoLabel.textContent = 'Видео загружено';
-    } else {
-      delete videoSlot.dataset.uploadedUrl;
-      if (videoIcon) videoIcon.textContent = '➕';
-      if (videoLabel) videoLabel.textContent = 'Загрузить видео';
     }
   }
 
@@ -462,8 +513,6 @@ export function cancelProductEdit() {
   elements.fPrice.value = '';
   elements.fStatus.value = 'available';
   elements.fSizes.value = '';
-  elements.fEmoji.value = '';
-  elements.fColor.value = '';
   elements.fDescRu.value = '';
   elements.fDescEn.value = '';
 
@@ -479,19 +528,6 @@ export function cancelProductEdit() {
       const fileInput = slot.querySelector('input[type="file"]');
       if (fileInput) fileInput.value = '';
     }
-  }
-
-  const videoSlot = document.getElementById('media-slot-video');
-  if (videoSlot) {
-    delete videoSlot.dataset.uploadedUrl;
-    const progress = videoSlot.querySelector('.media-slot-progress');
-    if (progress) progress.style.width = '0%';
-    const label = videoSlot.querySelector('.media-slot-label');
-    if (label) label.textContent = 'Загрузить видео';
-    const icon = videoSlot.querySelector('.media-slot-icon');
-    if (icon) icon.textContent = '➕';
-    const fileInput = videoSlot.querySelector('input[type="file"]');
-    if (fileInput) fileInput.value = '';
   }
 
   switchAdminTab('products');
@@ -529,12 +565,19 @@ window.changeStatus = changeQuickStatus;
 function renderAdminProducts() {
   if (!elements.productsTbody) return;
 
-  elements.productsTbody.innerHTML = allProducts.map(p => {
-    // Determine thumbnail (either first image url or emoji representation)
+  const activeProducts = allProducts.filter(p => p.status !== 'sold');
+
+  elements.productsTbody.innerHTML = activeProducts.map(p => {
     const hasMedia = p.images && p.images[0] && p.images[0].startsWith('http');
     const thumbHtml = hasMedia 
       ? `<img src="${p.images[0]}" style="width:36px;height:45px;object-fit:cover;border:1px solid var(--beige-mid)" />`
-      : `<span class="admin-product-emoji">${p.emoji}</span>`;
+      : `<div style="display:flex;align-items:center;justify-content:center;width:36px;height:45px;background:var(--beige-mid);margin:0 auto;">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.4; color: var(--brown);">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </div>`;
 
     return `
       <tr>
@@ -569,7 +612,13 @@ function renderAdminArchive() {
     const hasMedia = p.images && p.images[0] && p.images[0].startsWith('http');
     const thumbHtml = hasMedia 
       ? `<img src="${p.images[0]}" style="width:36px;height:45px;object-fit:cover" />`
-      : `<span class="admin-product-emoji">${p.emoji}</span>`;
+      : `<div style="display:flex;align-items:center;justify-content:center;width:36px;height:45px;background:var(--beige-mid);margin:0 auto;">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.4; color: var(--brown);">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </div>`;
 
     return `
       <tr>

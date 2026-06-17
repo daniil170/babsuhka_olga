@@ -1,7 +1,7 @@
 // Main Storefront Lifecycle & Routing Module
 import { 
   subscribeProducts, subscribeMaintenanceMode, subscribeAuthState, 
-  createOrder 
+  createOrder, subscribeHeroVideo 
 } from './firebase.js';
 import { 
   getCart, addToCart, removeFromCart, updateQuantity, 
@@ -62,9 +62,14 @@ document.addEventListener('DOMContentLoaded', () => {
     hidePreloader();
   });
 
+  // Subscribe to global background video URL
+  subscribeHeroVideo((url) => {
+    updateHeroVideoElement(url);
+  });
+
   // Scroll reveal setup
   setupScrollReveal();
-  
+
   // Responsive navbar updater
   updateNavLayout();
   window.addEventListener('resize', updateNavLayout);
@@ -255,6 +260,7 @@ function renderCatalog() {
   if (!dom.productsGrid) return;
 
   const filtered = productsList.filter(p => {
+    if (p.status === 'sold') return false;
     if (currentCategoryFilter === 'all') return true;
     return p.status === currentCategoryFilter;
   });
@@ -273,21 +279,30 @@ function renderCatalog() {
     const statusClass = { available: '', low: 'status-low', sold: 'status-sold' }[p.status];
 
     // Carousel Image layout
-    const imagesHtml = (p.images || []).map((img, i) => {
+    const imagesArray = p.images && p.images.length > 0 ? p.images.filter(Boolean) : [];
+    const displayArray = imagesArray.length > 0 ? imagesArray : ['']; // at least one slot for placeholder
+
+    const imagesHtml = displayArray.map((img, i) => {
       const hasRealImg = img && img.startsWith('http');
-      const imgStyle = `background: ${p.color || '#c4b49e'}; opacity: ${i === 0 ? '1' : '0'}; position: absolute; inset: 0; transition: opacity 0.4s; display: flex; align-items: center; justify-content: center;`;
+      const imgStyle = `background: var(--beige-mid); opacity: ${i === 0 ? '1' : '0'}; position: absolute; inset: 0; transition: opacity 0.4s; display: flex; align-items: center; justify-content: center;`;
       
       if (hasRealImg) {
         // Optimize delivery via Cloudinary helper
         const optimizedUrl = getOptimizedImageUrl(img, 400);
         return `<img class="product-card-img ${i === 0 ? 'active' : ''}" style="${imgStyle} object-fit: cover;" src="${optimizedUrl}" data-index="${i}" />`;
       } else {
-        return `<div class="product-img-placeholder" style="${imgStyle} font-size: 80px;" data-index="${i}">${img || p.emoji || '🧶'}</div>`;
+        return `<div class="product-img-placeholder" style="${imgStyle}" data-index="${i}">
+          <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.35; color: var(--brown);">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </div>`;
       }
     }).join('');
 
     // Carousel indicator dots
-    const dotsHtml = (p.images || []).map((_, i) => `
+    const dotsHtml = displayArray.map((_, i) => `
       <button class="product-img-dot ${i === 0 ? 'active' : ''}" onclick="event.stopPropagation(); window.changeCardImageState('${p.id}', ${i})"></button>
     `).join('');
 
@@ -300,10 +315,10 @@ function renderCatalog() {
 
     return `
       <div class="product-card ${isSold ? 'sold' : ''}" id="card-${p.id}" onclick="window.openProductDetail('${p.id}')">
-        <div class="product-card-images" style="background: ${p.color || '#c4b49e'}">
+        <div class="product-card-images" style="background: var(--beige-mid)">
           ${imagesHtml}
           ${statusLabel ? `<div class="product-status ${statusClass}">${statusLabel}</div>` : ''}
-          ${p.images && p.images.length > 1 ? `<div class="product-img-dots">${dotsHtml}</div>` : ''}
+          ${displayArray.length > 1 ? `<div class="product-img-dots">${dotsHtml}</div>` : ''}
         </div>
         <div class="product-card-body">
           <div class="product-card-name">${name}</div>
@@ -331,23 +346,75 @@ window.changeCardImageState = (id, index) => {
   dots.forEach((d, i) => d.classList.toggle('active', i === index));
 };
 
+window.contactForProduct = (id) => {
+  const p = productsList.find(x => x.id === id);
+  if (!p) return;
+  const name = p.name[currentLanguage] || p.name.ru;
+  const waText = currentLanguage === 'ru'
+    ? encodeURIComponent(`Здравствуйте! Я увидел в архиве товар «${name}» и хочу заказать такой же.`)
+    : encodeURIComponent(`Hello! I saw the item "${name}" in the archive and want to order a similar one.`);
+  window.open(`https://wa.me/77012345678?text=${waText}`, '_blank');
+};
+
 function renderArchiveCatalog() {
   if (!dom.archiveGrid) return;
 
   const soldProducts = productsList.filter(p => p.status === 'sold');
   
   dom.archiveGrid.innerHTML = soldProducts.map(p => {
-    const hasRealImg = p.images && p.images[0] && p.images[0].startsWith('http');
-    const mediaHtml = hasRealImg
-      ? `<img src="${getOptimizedImageUrl(p.images[0], 300)}" style="width:100%;height:100%;object-fit:cover" />`
-      : `<div style="font-size:44px">${p.emoji || '🧶'}</div>`;
+    const name = p.name[currentLanguage] || p.name.ru;
+    const material = p.material[currentLanguage] || p.material.ru;
+    
+    // Status text translation
+    const statusLabel = currentLanguage === 'ru' ? 'Продано' : 'Sold';
+    const statusClass = 'status-sold';
+
+    // Carousel Image layout
+    const imagesArray = p.images && p.images.length > 0 ? p.images.filter(Boolean) : [];
+    const displayArray = imagesArray.length > 0 ? imagesArray : ['']; // at least one slot for placeholder
+
+    const imagesHtml = displayArray.map((img, i) => {
+      const hasRealImg = img && img.startsWith('http');
+      const imgStyle = `background: var(--beige-mid); opacity: ${i === 0 ? '1' : '0'}; position: absolute; inset: 0; transition: opacity 0.4s; display: flex; align-items: center; justify-content: center;`;
+      
+      if (hasRealImg) {
+        const optimizedUrl = getOptimizedImageUrl(img, 400);
+        return `<img class="product-card-img ${i === 0 ? 'active' : ''}" style="${imgStyle} object-fit: cover;" src="${optimizedUrl}" data-index="${i}" />`;
+      } else {
+        return `<div class="product-img-placeholder" style="${imgStyle}" data-index="${i}">
+          <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.35; color: var(--brown);">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </div>`;
+      }
+    }).join('');
+
+    // Carousel indicator dots
+    const dotsHtml = displayArray.map((_, i) => `
+      <button class="product-img-dot ${i === 0 ? 'active' : ''}" onclick="event.stopPropagation(); window.changeCardImageState('${p.id}', ${i})"></button>
+    `).join('');
+
+    const priceText = p.price.toLocaleString('ru-RU');
 
     return `
-      <div class="archive-card">
-        <div class="archive-badge">${currentLanguage === 'ru' ? 'Продано' : 'Sold'}</div>
-        <div class="archive-card-img" style="background:${p.color || '#c4b49e'}">${mediaHtml}</div>
-        <div class="archive-card-name">${p.name[currentLanguage] || p.name.ru}</div>
-        <div class="archive-card-meta">${p.material[currentLanguage] || p.material.ru} · ${p.price.toLocaleString('ru-RU')} ₸</div>
+      <div class="product-card" id="card-${p.id}" onclick="window.openProductDetail('${p.id}')">
+        <div class="product-card-images" style="background: var(--beige-mid)">
+          ${imagesHtml}
+          <div class="product-status ${statusClass}">${statusLabel}</div>
+          ${displayArray.length > 1 ? `<div class="product-img-dots">${dotsHtml}</div>` : ''}
+        </div>
+        <div class="product-card-body">
+          <div class="product-card-name">${name}</div>
+          <div class="product-card-material">${material}</div>
+          <div class="product-card-footer">
+            <div class="product-card-price">${priceText} <span>₸</span></div>
+            <button class="btn-buy" onclick="event.stopPropagation(); window.contactForProduct('${p.id}')">
+              ${currentLanguage === 'ru' ? 'Хочу такой же' : 'Order Similar'}
+            </button>
+          </div>
+        </div>
       </div>
     `;
   }).join('') || `<p style="grid-column: 1/-1; color: var(--sold); font-style: italic; text-align: center; width: 100%;">${currentLanguage === 'ru' ? 'Архив пуст' : 'Archive is empty'}</p>`;
@@ -374,50 +441,56 @@ function openModal(p) {
   // Render main media container
   renderModalMedia(p);
 
-  // Render thumbnails (up to 3 photos + 1 video if exists)
-  let thumbsHtml = (p.images || []).map((img, i) => {
-    const isUrl = img && img.startsWith('http');
-    const bgStyle = isUrl ? `background-image: url(${getOptimizedImageUrl(img, 100)})` : '';
-    const content = isUrl ? '' : img;
+  // Render thumbnails (up to 3 photos)
+  const validImages = (p.images || []).filter(img => img && img.startsWith('http'));
+  let thumbsHtml = validImages.map((img, i) => {
+    const bgStyle = `background-image: url(${getOptimizedImageUrl(img, 100)})`;
     return `
-      <div class="modal-thumb ${i === 0 ? 'active' : ''}" onclick="window.setModalMediaIndex(${i})" style="background-color: ${p.color}; ${bgStyle}">
-        ${content}
+      <div class="modal-thumb ${i === 0 ? 'active' : ''}" onclick="window.setModalMediaIndex(${i})" style="background-color: var(--beige-mid); ${bgStyle}">
       </div>
     `;
   }).join('');
 
-  if (p.videoUrl) {
-    thumbsHtml += `
-      <div class="modal-thumb" onclick="window.setModalMediaIndex(3)" style="background-color: ${p.color}; font-size: 24px; display: flex; align-items: center; justify-content: center;">
-        🎥
-      </div>
-    `;
-  }
   dom.modalThumbsContainer.innerHTML = thumbsHtml;
 
-  // Render sizes
-  dom.modalSizesLabel.textContent = currentLanguage === 'ru' ? 'Размер' : 'Size';
-  dom.modalSizesContainer.innerHTML = (p.sizes || []).map((s, i) => `
-    <div class="modal-size ${i === 0 ? 'selected' : ''}" onclick="window.selectSizeElement(this)">${s}</div>
-  `).join('');
-
-  // Setup buy button
-  dom.modalBuyBtn.textContent = currentLanguage === 'ru' ? 'Добавить в корзину' : 'Add to Cart';
-  dom.modalBuyBtn.onclick = () => {
-    const selectedSizeEl = dom.modalSizesContainer.querySelector('.modal-size.selected');
-    if (!selectedSizeEl) {
-      showToast(currentLanguage === 'ru' ? 'Выберите размер' : 'Select a size');
-      return;
+  // Render sizes and buy button conditionally
+  if (p.status === 'sold') {
+    if (dom.modalSizesLabel) dom.modalSizesLabel.style.display = 'none';
+    if (dom.modalSizesContainer) dom.modalSizesContainer.style.display = 'none';
+    
+    dom.modalBuyBtn.textContent = currentLanguage === 'ru' ? 'Хочу такой же' : 'Order Similar';
+    dom.modalBuyBtn.onclick = () => {
+      window.contactForProduct(p.id);
+    };
+  } else {
+    if (dom.modalSizesLabel) {
+      dom.modalSizesLabel.style.display = 'block';
+      dom.modalSizesLabel.textContent = currentLanguage === 'ru' ? 'Размер' : 'Size';
     }
-    const size = selectedSizeEl.textContent;
-    addToCart(p, size);
-    showToast(
-      currentLanguage === 'ru' 
-        ? `«${p.name.ru}» (${size}) добавлен в корзину ✓` 
-        : `«${p.name.en}» (${size}) added to cart ✓`
-    );
-    closeModal();
-  };
+    if (dom.modalSizesContainer) {
+      dom.modalSizesContainer.style.display = 'flex';
+      dom.modalSizesContainer.innerHTML = (p.sizes || []).map((s, i) => `
+        <div class="modal-size ${i === 0 ? 'selected' : ''}" onclick="window.selectSizeElement(this)">${s}</div>
+      `).join('');
+    }
+    
+    dom.modalBuyBtn.textContent = currentLanguage === 'ru' ? 'Добавить в корзину' : 'Add to Cart';
+    dom.modalBuyBtn.onclick = () => {
+      const selectedSizeEl = dom.modalSizesContainer.querySelector('.modal-size.selected');
+      if (!selectedSizeEl) {
+        showToast(currentLanguage === 'ru' ? 'Выберите размер' : 'Select a size');
+        return;
+      }
+      const size = selectedSizeEl.textContent;
+      addToCart(p, size);
+      showToast(
+        currentLanguage === 'ru' 
+          ? `«${p.name.ru}» (${size}) добавлен в корзину ✓` 
+          : `«${p.name.en}» (${size}) added to cart ✓`
+      );
+      closeModal();
+    };
+  }
 
   dom.productModal.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -426,25 +499,21 @@ function openModal(p) {
 function renderModalMedia(p) {
   const currentIdx = activeModalMediaIndex;
   dom.modalImageMain.innerHTML = '';
-  dom.modalImageMain.style.background = p.color || '#c4b49e';
+  dom.modalImageMain.style.background = 'var(--beige-mid)';
 
-  if (currentIdx === 3 && p.videoUrl) {
-    // Render video player
-    const optimizedVideoUrl = getOptimizedVideoUrl(p.videoUrl);
-    const videoHtml = `<video controls autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;">
-      <source src="${optimizedVideoUrl}" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>`;
-    dom.modalImageMain.innerHTML = videoHtml;
+  const validImages = (p.images || []).filter(img => img && img.startsWith('http'));
+  const img = validImages[currentIdx] || '';
+  if (img && img.startsWith('http')) {
+    const optimizedUrl = getOptimizedImageUrl(img, 800);
+    dom.modalImageMain.innerHTML = `<img src="${optimizedUrl}" style="width: 100%; height: 100%; object-fit: cover;" />`;
   } else {
-    // Render image
-    const img = p.images && p.images[currentIdx] ? p.images[currentIdx] : '';
-    if (img && img.startsWith('http')) {
-      const optimizedUrl = getOptimizedImageUrl(img, 800);
-      dom.modalImageMain.innerHTML = `<img src="${optimizedUrl}" style="width: 100%; height: 100%; object-fit: cover;" />`;
-    } else {
-      dom.modalImageMain.innerHTML = `<div style="font-size: 100px;">${img || p.emoji || '🧶'}</div>`;
-    }
+    dom.modalImageMain.innerHTML = `<div class="product-img-placeholder" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
+      <svg viewBox="0 0 24 24" width="80" height="80" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.35; color: var(--brown);">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+        <polyline points="21 15 16 10 5 21"></polyline>
+      </svg>
+    </div>`;
   }
 }
 
@@ -455,7 +524,7 @@ window.setModalMediaIndex = (idx) => {
   
   // Update active thumbnail borders
   const thumbs = dom.modalThumbsContainer.querySelectorAll('.modal-thumb');
-  thumbs.forEach((t, i) => t.classList.toggle('active', i === idx || (idx === 3 && i === thumbs.length - 1)));
+  thumbs.forEach((t, i) => t.classList.toggle('active', i === idx));
 };
 
 window.selectSizeElement = (el) => {
@@ -574,14 +643,20 @@ function renderCartDrawer() {
   dom.cartSummaryValue.innerHTML = `${getCartTotal().toLocaleString('ru-RU')} <span>₸</span>`;
   
   dom.cartItemsContainer.innerHTML = items.map(item => {
-    const hasMedia = item.emoji && item.emoji.startsWith('http');
+    const hasMedia = item.image && item.image.startsWith('http');
     const mediaHtml = hasMedia 
-      ? `<img src="${getOptimizedImageUrl(item.emoji, 100)}" style="width:100%;height:100%;object-fit:cover" />`
-      : `<span>${item.emoji}</span>`;
+      ? `<img src="${getOptimizedImageUrl(item.image, 100)}" style="width:100%;height:100%;object-fit:cover" />`
+      : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.35; color: var(--brown);">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </div>`;
 
     return `
       <div class="cart-item">
-        <div class="cart-item-media" style="background: ${item.color}">
+        <div class="cart-item-media" style="background: var(--beige-mid)">
           ${mediaHtml}
         </div>
         <div class="cart-item-details">
@@ -656,3 +731,29 @@ function updateNavLayout() {
   if (dom.desktopLinks) dom.desktopLinks.style.display = isMobile ? 'none' : 'flex';
   if (!isMobile) closeDrawer();
 }
+
+function updateHeroVideoElement(url) {
+  const heroVideo = document.querySelector('.hero-video');
+  const heroFallback = document.querySelector('.hero-fallback');
+  if (!heroVideo) return;
+
+  if (url) {
+    const optimizedVideoUrl = getOptimizedVideoUrl(url);
+    const source = heroVideo.querySelector('source');
+    if (source && source.getAttribute('src') === optimizedVideoUrl) {
+      return;
+    }
+    heroVideo.innerHTML = `<source src="${optimizedVideoUrl}" type="video/mp4">`;
+    heroVideo.style.display = 'block';
+    heroVideo.load();
+    heroVideo.play().catch(err => {
+      console.warn('Hero video autoplay blocked or failed:', err);
+    });
+    if (heroFallback) heroFallback.style.display = 'none';
+  } else {
+    heroVideo.style.display = 'none';
+    heroVideo.innerHTML = '';
+    if (heroFallback) heroFallback.style.display = 'flex';
+  }
+}
+

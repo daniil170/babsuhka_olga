@@ -54,10 +54,8 @@ const DEFAULT_PRODUCTS = [
     material: { ru: '100% мериносовая шерсть', en: '100% merino wool' },
     price: 45000,
     sizes: ['XS','S','M','L','XL'],
-    emoji: '🌊',
-    color: '#b8ccd4',
     desc: { ru: 'Оверсайз свитер с фактурной вязкой, вдохновлённый волнами Каспийского моря. Широкие рукава, свободный силуэт — создан для уюта.', en: 'Oversized sweater with textured knit inspired by the waves of the Caspian Sea. Wide sleeves, relaxed fit — made for comfort.' },
-    images: ['🌊','🧶','✨']
+    images: []
   },
   {
     id: 'prod-2', status: 'low',
@@ -65,10 +63,8 @@ const DEFAULT_PRODUCTS = [
     material: { ru: 'Шерсть / альпака 80/20', en: 'Wool / alpaca 80/20' },
     price: 52000,
     sizes: ['S','M','L'],
-    emoji: '🌾',
-    color: '#c9b99a',
     desc: { ru: 'Нежный бежевый свитер из смеси шерсти и альпаки. Лёгкий, как казахстанский ветер в степи. Идеален для межсезонья.', en: 'Soft beige sweater in a wool-alpaca blend. As light as the Kazakh steppe wind. Perfect for transitional seasons.' },
-    images: ['🌾','🤎','🍂']
+    images: []
   },
   {
     id: 'prod-3', status: 'available',
@@ -76,10 +72,8 @@ const DEFAULT_PRODUCTS = [
     material: { ru: 'Мериносовая шерсть', en: 'Merino wool' },
     price: 48000,
     sizes: ['XS','S','M','L','XL','XXL'],
-    emoji: '🏔',
-    color: '#a0b4a8',
     desc: { ru: 'Именной свитер, названный в честь города, где всё началось. Плотная вязка, высокий ворот, долгое тепло.', en: 'A sweater named after the city where it all began. Tight knit, high collar, lasting warmth.' },
-    images: ['🏔','❄️','🤍']
+    images: []
   },
   {
     id: 'prod-4', status: 'sold',
@@ -87,10 +81,8 @@ const DEFAULT_PRODUCTS = [
     material: { ru: '100% шерсть', en: '100% wool' },
     price: 38000,
     sizes: ['S','M'],
-    emoji: '❄️',
-    color: '#d0d8e0',
     desc: { ru: 'Лаконичный зимний свитер с рельефным узором. Уже нашёл свой дом, но похожий можно заказать.', en: 'Simple winter sweater with textured pattern. Already has a home, but a similar one can be ordered.' },
-    images: ['❄️','🌨','🤍']
+    images: []
   },
   {
     id: 'prod-5', status: 'available',
@@ -98,10 +90,8 @@ const DEFAULT_PRODUCTS = [
     material: { ru: 'Шерсть / кашемир 70/30', en: 'Wool / cashmere 70/30' },
     price: 68000,
     sizes: ['XS','S','M','L'],
-    emoji: '🍂',
-    color: '#c4a882',
     desc: { ru: 'Премиальный свитер с добавлением кашемира. Невесомый и тёплый одновременно. Роскошь ручной работы.', en: 'Premium sweater with cashmere. Weightless and warm at the same time. Handmade luxury.' },
-    images: ['🍂','🤎','✨']
+    images: []
   },
   {
     id: 'prod-6', status: 'low',
@@ -109,10 +99,8 @@ const DEFAULT_PRODUCTS = [
     material: { ru: 'Мериносовая шерсть', en: 'Merino wool' },
     price: 44000,
     sizes: ['S','M','L','XL'],
-    emoji: '🌅',
-    color: '#d4a880',
     desc: { ru: 'Тёплый терракотовый оттенок — как закат над Каспием. Мягкая вязка, свободный крой, душевный цвет.', en: 'Warm terracotta shade — like a sunset over the Caspian. Soft knit, relaxed cut, heartfelt color.' },
-    images: ['🌅','🔥','🤍']
+    images: []
   }
 ];
 
@@ -136,6 +124,27 @@ const ordersListeners = [];
 
 // ── 2. PRODUCT SERVICES ──
 
+let isSeeding = false;
+
+async function seedDefaultProductsToFirestore() {
+  if (isSeeding || !db || !auth || !auth.currentUser) return;
+  isSeeding = true;
+  console.log('Seeding default products to Firestore because database is empty...');
+  try {
+    for (const p of DEFAULT_PRODUCTS) {
+      const { id, ...cleanData } = p;
+      cleanData.createdAt = new Date().toISOString();
+      cleanData.updatedAt = new Date().toISOString();
+      await addDoc(collection(db, 'products'), cleanData);
+    }
+    console.log('Seeding completed successfully!');
+  } catch (err) {
+    console.error('Failed to seed default products:', err);
+  } finally {
+    isSeeding = false;
+  }
+}
+
 // Real-time listener for products list
 export function subscribeProducts(callback) {
   if (db) {
@@ -147,6 +156,9 @@ export function subscribeProducts(callback) {
       });
       // Fallback initializer if Firestore collection is empty
       if (products.length === 0) {
+        if (auth && auth.currentUser) {
+          seedDefaultProductsToFirestore();
+        }
         callback(DEFAULT_PRODUCTS);
       } else {
         callback(products);
@@ -254,6 +266,43 @@ export async function setMaintenanceMode(enabled) {
     // Local fallback
     localStorage.setItem(MOCK_MAINTENANCE_KEY, enabled ? 'true' : 'false');
     maintenanceListeners.forEach(listener => listener(enabled));
+  }
+}
+
+// Update global background video URL
+export async function updateHeroVideo(url) {
+  if (db) {
+    await setDoc(doc(db, 'settings', 'global'), {
+      heroVideoUrl: url,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+  } else {
+    localStorage.setItem('babushka_olga_mock_hero_video', url);
+    window.dispatchEvent(new CustomEvent('mock-hero-video-changed'));
+  }
+}
+
+// Subscribe to global background video URL
+export function subscribeHeroVideo(callback) {
+  if (db) {
+    return onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
+      if (docSnap.exists()) {
+        callback(docSnap.data().heroVideoUrl || '');
+      } else {
+        callback('');
+      }
+    }, (error) => {
+      console.error('Firestore hero video subscription error:', error);
+      callback('');
+    });
+  } else {
+    const getHeroVideo = () => localStorage.getItem('babushka_olga_mock_hero_video') || '';
+    callback(getHeroVideo());
+    const handleMockChange = () => callback(getHeroVideo());
+    window.addEventListener('mock-hero-video-changed', handleMockChange);
+    return () => {
+      window.removeEventListener('mock-hero-video-changed', handleMockChange);
+    };
   }
 }
 

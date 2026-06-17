@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Бабушка Ольга — Ручные свитера из Актау</title>
+<title>Бабушка Ольга</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./src/css/main.css">
@@ -141,6 +142,17 @@
   </div>
 </div>
 
+<!-- HERO VIDEO PREVIEW MODAL -->
+<div class="form-modal-overlay" id="hero-video-preview-modal">
+  <div class="form-modal" style="max-width: 640px; padding: 24px;">
+    <button class="form-modal-close" onclick="closeHeroVideoPreviewModal()">✕</button>
+    <div class="form-modal-title">Предпросмотр Hero-видео</div>
+    <div style="width: 100%; border-radius: 4px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; aspect-ratio: 16/9;">
+      <video id="hero-video-preview-player" controls style="width: 100%; height: 100%; object-fit: contain;"></video>
+    </div>
+  </div>
+</div>
+
 <!-- MAINTENANCE COVER OVERLAY -->
 <div class="maintenance-overlay" id="maintenance-overlay">
   <div class="maintenance-icon">🧶</div>
@@ -150,6 +162,7 @@
 
 <!-- HERO -->
 <section class="hero" id="home">
+  <video class="hero-video" autoplay loop muted playsinline style="display: none;"></video>
   <div class="hero-fallback">
     <div class="hero-fallback-text">О</div>
   </div>
@@ -203,7 +216,6 @@
     <button class="filter-btn active" data-filter="all" data-ru="Все" data-en="All">Все</button>
     <button class="filter-btn" data-filter="available" data-ru="В наличии" data-en="Available">В наличии</button>
     <button class="filter-btn" data-filter="low" data-ru="Заканчиваются" data-en="Low Stock">Заканчиваются</button>
-    <button class="filter-btn" data-filter="sold" data-ru="Продано" data-en="Sold">Продано</button>
   </div>
   <div class="products-grid" id="products-grid"></div>
 </section>
@@ -339,6 +351,13 @@
       <div class="admin-nav-sub">Управление магазином</div>
     </div>
     <div class="admin-header-actions">
+      <div style="position:relative; display:flex; gap:8px; align-items:center;">
+        <input type="file" id="upload-hero-video" accept="video/*" style="display:none">
+        <button class="maintenance-toggle-btn" onclick="document.getElementById('upload-hero-video').click()" id="admin-hero-video-btn">🎬 Hero-видео</button>
+        <button class="maintenance-toggle-btn" id="admin-hero-video-preview-btn" style="display:none">👁 Предпросмотр</button>
+        <button class="maintenance-toggle-btn" id="admin-hero-video-delete-btn" style="display:none; background-color:#c0392b; color:var(--white); border-color:#c0392b;">❌ Удалить</button>
+        <div id="hero-video-progress" style="position:absolute; bottom:-12px; left:0; right:0; text-align:center; font-size:8px; color:var(--beige-accent); display:none">0%</div>
+      </div>
       <button class="maintenance-toggle-btn" id="admin-maintenance-toggle">Тех-обслуживание</button>
       <button class="admin-close-btn" onclick="logoutAdmin()">Выйти</button>
       <button class="admin-close-btn" onclick="closeAdmin()">← На сайт</button>
@@ -358,19 +377,21 @@
         <h2>Каталог товаров</h2>
         <button class="btn-add" onclick="switchAdminTab('add')">+ Добавить новый</button>
       </div>
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Товар</th>
-            <th>Название</th>
-            <th>Цена</th>
-            <th>Статус</th>
-            <th>Размеры</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody id="admin-products-tbody"></tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Товар</th>
+              <th>Название</th>
+              <th>Цена</th>
+              <th>Статус</th>
+              <th>Размеры</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody id="admin-products-tbody"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- ADD/EDIT TAB -->
@@ -416,21 +437,11 @@
           <label>Размеры (через запятую)</label>
           <input type="text" id="f-sizes" placeholder="XS, S, M, L, XL">
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Иконка / Эмодзи товара</label>
-            <input type="text" id="f-emoji" placeholder="🧶">
-          </div>
-          <div class="form-group">
-            <label>Цвет фона карточки (hex)</label>
-            <input type="text" id="f-color" placeholder="#b8ccd4">
-          </div>
-        </div>
         
         <!-- MEDIA UPLOAD SLOTS -->
         <div class="form-group">
-          <label>Медиафайлы (3 фотографии + 1 видео)</label>
-          <div class="media-upload-grid">
+          <label>Медиафайлы (3 фотографии)</label>
+          <div class="media-upload-grid" style="grid-template-columns: repeat(3, 1fr);">
             <div class="media-slot" id="media-slot-photo-1">
               <span class="media-slot-icon">➕</span>
               <span class="media-slot-label">Фото 1</span>
@@ -450,13 +461,6 @@
               <span class="media-slot-label">Фото 3</span>
               <img class="media-slot-preview" style="display:none" />
               <input type="file" id="upload-photo-3" accept="image/*">
-              <div class="media-slot-progress" style="width: 0%"></div>
-            </div>
-            <div class="media-slot" id="media-slot-video">
-              <span class="media-slot-icon">➕</span>
-              <span class="media-slot-label">Загрузить видео</span>
-              <img class="media-slot-preview" style="display:none" />
-              <input type="file" id="upload-video" accept="video/*">
               <div class="media-slot-progress" style="width: 0%"></div>
             </div>
           </div>
@@ -482,17 +486,19 @@
       <div class="admin-products-header">
         <h2>Архив проданных свитеров</h2>
       </div>
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Товар</th>
-            <th>Название</th>
-            <th>Цена</th>
-            <th>Статус</th>
-          </tr>
-        </thead>
-        <tbody id="admin-archive-tbody"></tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Товар</th>
+              <th>Название</th>
+              <th>Цена</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody id="admin-archive-tbody"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- ORDERS TAB -->
@@ -500,18 +506,20 @@
       <div class="admin-products-header">
         <h2>Заказы клиентов (Лиды)</h2>
       </div>
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Клиент</th>
-            <th>Товары</th>
-            <th>Сумма</th>
-            <th>Статус</th>
-            <th>Дата</th>
-          </tr>
-        </thead>
-        <tbody id="admin-orders-tbody"></tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Клиент</th>
+              <th>Товары</th>
+              <th>Сумма</th>
+              <th>Статус</th>
+              <th>Дата</th>
+            </tr>
+          </thead>
+          <tbody id="admin-orders-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
