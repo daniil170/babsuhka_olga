@@ -242,6 +242,11 @@ function setupUIEventListeners() {
       if (e.target === e.currentTarget) window.closeSizeModal();
     });
   }
+  if (dom.productModal) {
+    dom.productModal.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) window.closeModal();
+    });
+  }
 }
 
 // ── 2. CATALOG RENDERERS ──
@@ -463,9 +468,6 @@ window.closeModal = () => {
   document.body.style.overflow = '';
   currentSelectedModalProduct = null;
 };
-dom.productModal.addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeModal();
-});
 
 function hidePreloader() {
   if (dom.preloader && !dom.preloader.classList.contains('fade-out')) {
