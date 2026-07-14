@@ -18,5 +18,11 @@ service cloud.firestore {
       allow create: if true;
       allow read, update, delete: if request.auth != null;
     }
+
+    // Subscribers can be created by anyone, but read/modified only by authenticated admins
+    match /subscribers/{subscriberId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
   }
 }

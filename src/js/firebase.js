@@ -21,6 +21,8 @@ const MOCK_PRODUCTS_KEY = 'babushka_olga_mock_products';
 const MOCK_ORDERS_KEY = 'babushka_olga_mock_orders';
 const MOCK_MAINTENANCE_KEY = 'babushka_olga_mock_maintenance';
 const MOCK_AUTH_KEY = 'babushka_olga_mock_admin';
+const MOCK_DROP_SETTINGS_KEY = 'babushka_olga_mock_drop_settings';
+const MOCK_SUBSCRIBERS_KEY = 'babushka_olga_mock_subscribers';
 
 // Initialize Firebase
 if (isFirebaseConfigured) {
@@ -47,62 +49,7 @@ if (isFirebaseConfigured) {
 }
 
 // ── 1. MOCK DATA INITIALIZER ──
-const DEFAULT_PRODUCTS = [
-  {
-    id: 'prod-1', status: 'available',
-    name: { ru: 'Свитер «Каспий»', en: 'Sweater «Caspian»' },
-    material: { ru: '100% мериносовая шерсть', en: '100% merino wool' },
-    price: 45000,
-    sizes: ['XS','S','M','L','XL'],
-    desc: { ru: 'Оверсайз свитер с фактурной вязкой, вдохновлённый волнами Каспийского моря. Широкие рукава, свободный силуэт — создан для уюта.', en: 'Oversized sweater with textured knit inspired by the waves of the Caspian Sea. Wide sleeves, relaxed fit — made for comfort.' },
-    images: []
-  },
-  {
-    id: 'prod-2', status: 'low',
-    name: { ru: 'Свитер «Степь»', en: 'Sweater «Steppe»' },
-    material: { ru: 'Шерсть / альпака 80/20', en: 'Wool / alpaca 80/20' },
-    price: 52000,
-    sizes: ['S','M','L'],
-    desc: { ru: 'Нежный бежевый свитер из смеси шерсти и альпаки. Лёгкий, как казахстанский ветер в степи. Идеален для межсезонья.', en: 'Soft beige sweater in a wool-alpaca blend. As light as the Kazakh steppe wind. Perfect for transitional seasons.' },
-    images: []
-  },
-  {
-    id: 'prod-3', status: 'available',
-    name: { ru: 'Свитер «Актау»', en: 'Sweater «Aktau»' },
-    material: { ru: 'Мериносовая шерсть', en: 'Merino wool' },
-    price: 48000,
-    sizes: ['XS','S','M','L','XL','XXL'],
-    desc: { ru: 'Именной свитер, названный в честь города, где всё началось. Плотная вязка, высокий ворот, долгое тепло.', en: 'A sweater named after the city where it all began. Tight knit, high collar, lasting warmth.' },
-    images: []
-  },
-  {
-    id: 'prod-4', status: 'sold',
-    name: { ru: 'Свитер «Зима»', en: 'Sweater «Winter»' },
-    material: { ru: '100% шерсть', en: '100% wool' },
-    price: 38000,
-    sizes: ['S','M'],
-    desc: { ru: 'Лаконичный зимний свитер с рельефным узором. Уже нашёл свой дом, но похожий можно заказать.', en: 'Simple winter sweater with textured pattern. Already has a home, but a similar one can be ordered.' },
-    images: []
-  },
-  {
-    id: 'prod-5', status: 'available',
-    name: { ru: 'Свитер «Тундра»', en: 'Sweater «Tundra»' },
-    material: { ru: 'Шерсть / кашемир 70/30', en: 'Wool / cashmere 70/30' },
-    price: 68000,
-    sizes: ['XS','S','M','L'],
-    desc: { ru: 'Премиальный свитер с добавлением кашемира. Невесомый и тёплый одновременно. Роскошь ручной работы.', en: 'Premium sweater with cashmere. Weightless and warm at the same time. Handmade luxury.' },
-    images: []
-  },
-  {
-    id: 'prod-6', status: 'low',
-    name: { ru: 'Свитер «Закат»', en: 'Sweater «Sunset»' },
-    material: { ru: 'Мериносовая шерсть', en: 'Merino wool' },
-    price: 44000,
-    sizes: ['S','M','L','XL'],
-    desc: { ru: 'Тёплый терракотовый оттенок — как закат над Каспием. Мягкая вязка, свободный крой, душевный цвет.', en: 'Warm terracotta shade — like a sunset over the Caspian. Soft knit, relaxed cut, heartfelt color.' },
-    images: []
-  }
-];
+const DEFAULT_PRODUCTS = [];
 
 function initMockData() {
   if (!localStorage.getItem(MOCK_PRODUCTS_KEY)) {
@@ -114,6 +61,16 @@ function initMockData() {
   if (!localStorage.getItem(MOCK_MAINTENANCE_KEY)) {
     localStorage.setItem(MOCK_MAINTENANCE_KEY, 'false');
   }
+  if (!localStorage.getItem(MOCK_DROP_SETTINGS_KEY)) {
+    localStorage.setItem(MOCK_DROP_SETTINGS_KEY, JSON.stringify({
+      title: { ru: 'Коллекция «Горный воздух»', en: 'Mountain Air Collection' },
+      date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+      active: true
+    }));
+  }
+  if (!localStorage.getItem(MOCK_SUBSCRIBERS_KEY)) {
+    localStorage.setItem(MOCK_SUBSCRIBERS_KEY, JSON.stringify([]));
+  }
 }
 initMockData();
 
@@ -121,6 +78,8 @@ initMockData();
 const productsListeners = [];
 const maintenanceListeners = [];
 const ordersListeners = [];
+const dropSettingsListeners = [];
+const subscribersListeners = [];
 
 // ── 2. PRODUCT SERVICES ──
 
@@ -228,93 +187,96 @@ export async function deleteProduct(id) {
   }
 }
 
-// ── 3. MAINTENANCE MODE SERVICES ──
+// ── 3. GLOBAL SETTINGS SERVICES ──
 
-// Real-time listener for maintenance mode
-export function subscribeMaintenanceMode(callback) {
+// Real-time listener for global settings (maintenance mode, video url, background images, etc.)
+export function subscribeGlobalSettings(callback) {
   if (db) {
     return onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
       if (docSnap.exists()) {
-        callback(docSnap.data().maintenanceMode || false);
+        callback(docSnap.data());
       } else {
-        callback(false);
+        callback({});
       }
     }, (error) => {
-      console.error('Firestore maintenance mode subscription error:', error);
-      callback(false);
+      console.error('Firestore global settings subscription error:', error);
+      callback({});
     });
   } else {
     // Local fallback
-    maintenanceListeners.push(callback);
-    const isMaintenance = localStorage.getItem(MOCK_MAINTENANCE_KEY) === 'true';
-    callback(isMaintenance);
+    const getLocalGlobalSettings = () => {
+      try {
+        const stored = localStorage.getItem('babushka_olga_mock_global_settings');
+        if (stored) return JSON.parse(stored);
+      } catch {}
+      // Fallback: migrate from old mock keys
+      const maintenance = localStorage.getItem(MOCK_MAINTENANCE_KEY) === 'true';
+      const video = localStorage.getItem('babushka_olga_mock_hero_video') || '';
+      const brandStory = localStorage.getItem('babushka_olga_mock_brand_story') || '';
+      const logoHero = localStorage.getItem('babushka_olga_mock_logo_hero') || '';
+      return {
+        maintenanceMode: maintenance,
+        heroVideoUrl: video,
+        brandStoryImageUrl: brandStory,
+        logoHeroImageUrl: logoHero
+      };
+    };
+    
+    const listener = () => callback(getLocalGlobalSettings());
+    window.addEventListener('mock-global-settings-changed', listener);
+    callback(getLocalGlobalSettings());
     return () => {
-      const index = maintenanceListeners.indexOf(callback);
-      if (index > -1) maintenanceListeners.splice(index, 1);
+      window.removeEventListener('mock-global-settings-changed', listener);
     };
   }
 }
 
-// Toggle maintenance mode
-export async function setMaintenanceMode(enabled) {
+// Update global settings
+export async function updateGlobalSettings(data) {
   if (db) {
     await setDoc(doc(db, 'settings', 'global'), {
-      maintenanceMode: enabled,
+      ...data,
       updatedAt: new Date().toISOString()
     }, { merge: true });
   } else {
     // Local fallback
-    localStorage.setItem(MOCK_MAINTENANCE_KEY, enabled ? 'true' : 'false');
-    maintenanceListeners.forEach(listener => listener(enabled));
-  }
-}
-
-// Update global background video URL
-export async function updateHeroVideo(url) {
-  if (db) {
-    await setDoc(doc(db, 'settings', 'global'), {
-      heroVideoUrl: url,
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
-  } else {
-    localStorage.setItem('babushka_olga_mock_hero_video', url);
-    window.dispatchEvent(new CustomEvent('mock-hero-video-changed'));
-  }
-}
-
-// Subscribe to global background video URL
-export function subscribeHeroVideo(callback) {
-  if (db) {
-    return onSnapshot(doc(db, 'settings', 'global'), (docSnap) => {
-      if (docSnap.exists()) {
-        callback(docSnap.data().heroVideoUrl || '');
-      } else {
-        callback('');
-      }
-    }, (error) => {
-      console.error('Firestore hero video subscription error:', error);
-      callback('');
-    });
-  } else {
-    const getHeroVideo = () => localStorage.getItem('babushka_olga_mock_hero_video') || '';
-    callback(getHeroVideo());
-    const handleMockChange = () => callback(getHeroVideo());
-    window.addEventListener('mock-hero-video-changed', handleMockChange);
-    return () => {
-      window.removeEventListener('mock-hero-video-changed', handleMockChange);
-    };
+    let current = {};
+    try {
+      const stored = localStorage.getItem('babushka_olga_mock_global_settings');
+      if (stored) current = JSON.parse(stored);
+    } catch {}
+    // If not set yet, migrate old keys
+    if (Object.keys(current).length === 0) {
+      current = {
+        maintenanceMode: localStorage.getItem(MOCK_MAINTENANCE_KEY) === 'true',
+        heroVideoUrl: localStorage.getItem('babushka_olga_mock_hero_video') || '',
+        brandStoryImageUrl: localStorage.getItem('babushka_olga_mock_brand_story') || '',
+        logoHeroImageUrl: localStorage.getItem('babushka_olga_mock_logo_hero') || ''
+      };
+    }
+    const updated = { ...current, ...data };
+    localStorage.setItem('babushka_olga_mock_global_settings', JSON.stringify(updated));
+    // Also save individual keys for legacy compatibility
+    if (data.maintenanceMode !== undefined) {
+      localStorage.setItem(MOCK_MAINTENANCE_KEY, data.maintenanceMode ? 'true' : 'false');
+    }
+    if (data.heroVideoUrl !== undefined) {
+      localStorage.setItem('babushka_olga_mock_hero_video', data.heroVideoUrl);
+    }
+    window.dispatchEvent(new CustomEvent('mock-global-settings-changed'));
   }
 }
 
 // ── 4. ORDER / LEADS SERVICES ──
 
 // Create new customer order (from storefront checkout)
-export async function createOrder(customerName, customerPhone, cartItems, totalPrice) {
+export async function createOrder(customerName, customerPhone, cartItems, totalPrice, discountAmount = 0) {
   const orderData = {
     customerName,
     customerPhone,
     items: cartItems,
     totalPrice,
+    discountAmount,
     status: 'new', // new, completed
     createdAt: new Date().toISOString()
   };
@@ -373,6 +335,19 @@ export async function updateOrderStatus(orderId, status) {
       localStorage.setItem(MOCK_ORDERS_KEY, JSON.stringify(orders));
       ordersListeners.forEach(listener => listener(orders));
     }
+  }
+}
+
+// Delete customer order (lead)
+export async function deleteOrder(orderId) {
+  if (db) {
+    await deleteDoc(doc(db, 'orders', orderId));
+  } else {
+    // Local fallback
+    let orders = JSON.parse(localStorage.getItem(MOCK_ORDERS_KEY)) || [];
+    orders = orders.filter(o => o.id !== orderId);
+    localStorage.setItem(MOCK_ORDERS_KEY, JSON.stringify(orders));
+    ordersListeners.forEach(listener => listener(orders));
   }
 }
 
@@ -452,5 +427,86 @@ export async function logoutAdmin() {
     localStorage.setItem(MOCK_AUTH_KEY, 'false');
     localStorage.removeItem('mock_active_email');
     window.dispatchEvent(new CustomEvent('mock-auth-changed'));
+  }
+}
+
+// ── 6. DROP SETTINGS AND SUBSCRIBERS SERVICES ──
+
+export async function saveDropSettings(titleRu, titleEn, dateStr, active) {
+  const data = {
+    title: { ru: titleRu, en: titleEn },
+    date: dateStr,
+    active: active,
+    updatedAt: new Date().toISOString()
+  };
+  if (db) {
+    await setDoc(doc(db, 'settings', 'drop'), data);
+  } else {
+    localStorage.setItem(MOCK_DROP_SETTINGS_KEY, JSON.stringify(data));
+    dropSettingsListeners.forEach(listener => listener(data));
+  }
+}
+
+export function subscribeDropSettings(callback) {
+  if (db) {
+    return onSnapshot(doc(db, 'settings', 'drop'), (docSnap) => {
+      if (docSnap.exists()) {
+        callback(docSnap.data());
+      } else {
+        callback({ title: { ru: '', en: '' }, date: '', active: false });
+      }
+    }, (error) => {
+      console.error('Firestore drop settings subscription error:', error);
+      callback({ title: { ru: '', en: '' }, date: '', active: false });
+    });
+  } else {
+    dropSettingsListeners.push(callback);
+    const getLocalSettings = () => JSON.parse(localStorage.getItem(MOCK_DROP_SETTINGS_KEY)) || { title: { ru: '', en: '' }, date: '', active: false };
+    callback(getLocalSettings());
+    return () => {
+      const index = dropSettingsListeners.indexOf(callback);
+      if (index > -1) dropSettingsListeners.splice(index, 1);
+    };
+  }
+}
+
+export async function addSubscriber(email) {
+  const subscriberData = {
+    email: email.trim().toLowerCase(),
+    createdAt: new Date().toISOString()
+  };
+  if (db) {
+    await addDoc(collection(db, 'subscribers'), subscriberData);
+  } else {
+    const subscribers = JSON.parse(localStorage.getItem(MOCK_SUBSCRIBERS_KEY)) || [];
+    if (!subscribers.find(s => s.email === subscriberData.email)) {
+      subscribers.push(subscriberData);
+      localStorage.setItem(MOCK_SUBSCRIBERS_KEY, JSON.stringify(subscribers));
+      subscribersListeners.forEach(listener => listener(subscribers));
+    }
+  }
+}
+
+export function subscribeSubscribers(callback) {
+  if (db) {
+    const q = query(collection(db, 'subscribers'), orderBy('createdAt', 'desc'));
+    return onSnapshot(q, (snapshot) => {
+      const subscribers = [];
+      snapshot.forEach((doc) => {
+        subscribers.push({ id: doc.id, ...doc.data() });
+      });
+      callback(subscribers);
+    }, (error) => {
+      console.error('Firestore subscribers subscription error:', error);
+      callback([]);
+    });
+  } else {
+    subscribersListeners.push(callback);
+    const getLocalSubscribers = () => JSON.parse(localStorage.getItem(MOCK_SUBSCRIBERS_KEY)) || [];
+    callback(getLocalSubscribers());
+    return () => {
+      const index = subscribersListeners.indexOf(callback);
+      if (index > -1) subscribersListeners.splice(index, 1);
+    };
   }
 }

@@ -7,62 +7,195 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/assets/index-Brcek0Ua.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CVGjdOct.css">
+  <script type="module" crossorigin src="/assets/index-DQanZgM5.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CorkrIeD.css">
 </head>
 <body>
 
 <!-- PRELOADER -->
+<!-- PRELOADER -->
 <div id="preloader">
-  <div class="preloader-content">
-    <div class="preloader-yarn">🧶</div>
-    <div class="preloader-text-ru">Загрузка уюта...</div>
-    <div class="preloader-text-en" style="display:none">Loading warmth...</div>
+  <div class="preloader-content" style="width: 100%; max-width: 600px; padding: 20px; box-sizing: border-box;">
+    <canvas id="yarn-loader" width="700" height="200" style="width: 100%; height: auto; display: block;"></canvas>
   </div>
 </div>
+<script>
+(function() {
+  const canvas = document.getElementById('yarn-loader');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const FLOOR_Y = 140;
+  const R0 = 32;
+  const START_X = 100;
+  const END_X = 600;
+  const DURATION = 5500; // Slower speed (5.5 seconds)
+  let start = null;
+  const STROKE_COLOR = '#4a3e3d'; // Brand brown color
+
+  window.preloaderAnimationFinished = false;
+  window.canHidePreloader = false;
+
+  function ease(t) {
+    return t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+  }
+
+  function drawYarnBall(cx, cy, r, angle) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.strokeStyle = STROKE_COLOR;
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+    ctx.rotate(angle);
+    const lines = 5;
+    for (let i = -lines; i <= lines; i++) {
+      const y = (i / lines) * r * 0.88;
+      const hw = Math.sqrt(Math.max(0, r * r - y * y)) * 0.95;
+      if (hw < 2) continue;
+      const sag = hw * 0.18 * Math.sign(i + 0.1);
+      ctx.beginPath();
+      ctx.moveTo(-hw, y);
+      ctx.quadraticCurveTo(0, y + sag, hw, y);
+      ctx.strokeStyle = STROKE_COLOR;
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+    }
+    const vlines = 4;
+    for (let i = -vlines; i <= vlines; i++) {
+      const x = (i / vlines) * r * 0.88;
+      const hh = Math.sqrt(Math.max(0, r * r - x * x)) * 0.95;
+      if (hh < 2) continue;
+      const sag = hh * 0.18 * Math.sign(i + 0.1);
+      ctx.beginPath();
+      ctx.moveTo(x, -hh);
+      ctx.quadraticCurveTo(x + sag, 0, x, hh);
+      ctx.strokeStyle = STROKE_COLOR;
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function draw(ts) {
+    const preloader = document.getElementById('preloader');
+    if (preloader && preloader.classList.contains('fade-out')) {
+      return; // Stop animating when preloader fades out
+    }
+    
+    if (!start) start = ts;
+    const raw = Math.min((ts - start) / DURATION, 1);
+    const t = ease(raw);
+    ctx.clearRect(0, 0, 700, 200);
+    
+    const r = R0 * (1 - t * 0.92);
+    const ballX = START_X + (END_X - START_X) * t;
+    
+    // Add minor organic bobbing motion to make the ball feel soft and hand-wound
+    const wobble = Math.abs(Math.sin(t * Math.PI * 16)) * 1.5;
+    const ballY = FLOOR_Y - r + wobble;
+    
+    const dist = (END_X - START_X) * t;
+    const angle = dist / R0;
+    
+    ctx.beginPath();
+    ctx.moveTo(START_X - R0, FLOOR_Y);
+    let x = START_X - R0;
+    const targetX = ballX - r * 0.2;
+    while (x < targetX - 1) {
+      const next = Math.min(x + 42, targetX);
+      const mid = (x + next) / 2;
+      const wave = Math.sin((x / 55)) * 4;
+      ctx.quadraticCurveTo(mid, FLOOR_Y - wave, next, FLOOR_Y);
+      x = next;
+    }
+    ctx.strokeStyle = STROKE_COLOR;
+    ctx.lineWidth = 1.4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+    
+    if (r > 2) {
+      drawYarnBall(ballX, ballY, r, angle);
+      ctx.beginPath();
+      ctx.moveTo(ballX - r * 0.2, ballY + r * 0.96);
+      ctx.lineTo(ballX - r * 0.2, FLOOR_Y);
+      ctx.strokeStyle = STROKE_COLOR;
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+    }
+    
+    if (raw < 1) {
+      requestAnimationFrame(draw);
+    } else {
+      window.preloaderAnimationFinished = true;
+      if (window.canHidePreloader) {
+        const p = document.getElementById('preloader');
+        if (p && !p.classList.contains('fade-out')) {
+          setTimeout(() => {
+            p.classList.add('fade-out');
+          }, 450);
+        }
+      } else {
+        // If DOM not ready yet, delay before looping back
+        start = null;
+        setTimeout(() => {
+          const p = document.getElementById('preloader');
+          if (p && !p.classList.contains('fade-out')) {
+            requestAnimationFrame(draw);
+          }
+        }, 800);
+      }
+    }
+  }
+
+  requestAnimationFrame(draw);
+})();
+</script>
 
 <!-- NAVIGATION -->
 <nav>
-  <a href="#" class="nav-logo">
-    Бабушка Ольга
-    <span data-ru="Ручные свитера · Актау" data-en="Handcrafted Knitwear · Aktau">Ручные свитера · Актау</span>
+  <!-- Burger menu on left on mobile, hidden on desktop -->
+  <button class="burger" id="burger" onclick="toggleDrawer()">
+    <span></span><span></span><span></span>
+  </button>
+
+  <a href="/" class="nav-logo">
+    Babushka Olga
+    <span data-ru="Ручные свитера · Алматы" data-en="Handcrafted Knitwear · Almaty">Ручные свитера · Алматы</span>
   </a>
+  
   <div class="nav-links">
-    <a href="#products" data-ru="Коллекция" data-en="Collection">Коллекция</a>
-    <a href="#article" data-ru="Уход" data-en="Care Guide">Уход</a>
-    <a href="#archive" data-ru="Архив" data-en="Archive">Архив</a>
-    <a href="#story" data-ru="История" data-en="Our Story">История</a>
-    <div class="lang-toggle">
-      <button class="lang-btn active" onclick="setLang('ru')">RU</button>
-      <button class="lang-btn" onclick="setLang('en')">EN</button>
-    </div>
-    <button class="cart-trigger" onclick="toggleCart()" title="Открыть корзину">
-      🛒 <span class="cart-badge" id="cart-badge" style="display:none">0</span>
-    </button>
+    <a href="/catalog" data-ru="Коллекция" data-en="Collection">Коллекция</a>
+    <a href="/sale" data-ru="Скидки" data-en="Sale">Скидки</a>
+    <a href="/brand" data-ru="Бренд" data-en="Brand">Бренд</a>
   </div>
   
-  <!-- Mobile actions -->
-  <div class="nav-mobile-actions" style="display:none">
-    <button class="cart-trigger" onclick="toggleCart()" title="Открыть корзину" style="margin-right:8px">
-      🛒 <span class="cart-badge" id="cart-badge" style="display:none">0</span>
-    </button>
-    <div class="mobile-lang">
-      <button class="lang-btn active" onclick="setLang('ru')">RU</button>
-      <button class="lang-btn" onclick="setLang('en')">EN</button>
-    </div>
-    <button class="burger" id="burger" onclick="toggleDrawer()">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
+  <!-- Mobile actions: empty placeholder to keep logo centered -->
+  <div class="nav-mobile-actions"></div>
 </nav>
 
 <!-- Mobile Drawer -->
 <div class="mobile-drawer" id="mobile-drawer">
-  <a href="#products" onclick="closeDrawer()" data-ru="Коллекция" data-en="Collection">Коллекция</a>
-  <a href="#article" onclick="closeDrawer()" data-ru="Уход" data-en="Care Guide">Уход</a>
-  <a href="#archive" onclick="closeDrawer()" data-ru="Архив" data-en="Archive">Архив</a>
-  <a href="#story" onclick="closeDrawer()" data-ru="История" data-en="Our Story">История</a>
-  <a href="#thankyou" onclick="closeDrawer()" data-ru="Благодарность" data-en="Gratitude">Благодарность</a>
+  <a href="/catalog" onclick="closeDrawer()" data-ru="Коллекция" data-en="Collection">Коллекция</a>
+  <a href="/brand" onclick="closeDrawer()" data-ru="Бренд" data-en="Brand">Бренд</a>
+</div>
+
+<!-- BOTTOM WIDGETS BAR -->
+<div class="bottom-widgets">
+  <button onclick="toggleFavorites()" class="widget-btn">
+    <span data-ru="избранное" data-en="favorites">избранное</span>&nbsp;<span class="fav-badge-count">(0)</span>
+  </button>
+  <div class="widget-divider"></div>
+  <div class="widget-lang">
+    <button class="lang-btn active" onclick="setLang('ru')">RU</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+  </div>
+  <div class="widget-divider"></div>
+  <button onclick="toggleCart()" class="widget-btn">
+    <span data-ru="корзина" data-en="cart">корзина</span>&nbsp;<span class="cart-badge-count">(0)</span>
+  </button>
 </div>
 
 <!-- SHOPPING CART DRAWER -->
@@ -81,6 +214,18 @@
       <div class="cart-summary-value" id="cart-summary-value">0 <span>₸</span></div>
     </div>
     <button class="cart-checkout-btn" id="cart-checkout-btn" onclick="openCheckoutModal()" data-ru="Оформить заказ" data-en="Checkout">Оформить заказ</button>
+  </div>
+</div>
+
+<!-- FAVORITES DRAWER -->
+<div class="cart-overlay" id="favorites-overlay"></div>
+<div class="cart-drawer" id="favorites-drawer">
+  <div class="cart-header">
+    <h3 data-ru="Избранное" data-en="Favorites">Избранное</h3>
+    <button class="cart-close" id="favorites-close-btn">✕</button>
+  </div>
+  <div class="cart-body" id="favorites-items-container">
+    <!-- Dynamic favorites items go here -->
   </div>
 </div>
 
@@ -135,7 +280,6 @@
       
       <div class="login-links" style="margin-top:20px; display:flex; flex-direction:column; gap:8px; font-size:12px; text-align:center;">
         <a href="#" id="link-forgot-password" style="color:var(--brown); text-decoration:none;">Забыли пароль?</a>
-        <a href="#" id="link-register" style="color:var(--brown); text-decoration:none;">Создать аккаунт администратора</a>
         <a href="#" id="link-back-to-login" style="color:var(--brown); text-decoration:none; display:none;">Вернуться к входу</a>
       </div>
     </form>
@@ -153,6 +297,43 @@
   </div>
 </div>
 
+<!-- NEWSLETTER MODAL OVERLAY -->
+<div class="form-modal-overlay" id="newsletter-modal-overlay">
+  <div class="form-modal" style="max-width: 480px; padding: 40px 32px; text-align: center;">
+    <button class="form-modal-close" onclick="closeNewsletterModal()">✕</button>
+    <div style="font-size: 10px; font-weight: 500; letter-spacing: 0.3em; text-transform: uppercase; color: var(--beige-accent); margin-bottom: 12px;" data-ru="Приветственный подарок" data-en="Welcome Gift">Приветственный подарок</div>
+    <div class="form-modal-title" style="font-size: 28px; line-height: 1.1; margin-bottom: 16px;" data-ru="ДАРИМ СКИДКУ 5000 ₸" data-en="GET A 5,000 ₸ DISCOUNT">ДАРИМ СКИДКУ 5000 ₸</div>
+    
+    <p style="font-size: 13px; color: var(--brown); margin-bottom: 20px; line-height: 1.6;" data-ru="Подпишитесь на нашу рассылку, чтобы получить приветственную скидку на первый заказ* и первыми узнавать о новостях и специальных предложениях." data-en="Subscribe to our newsletter to receive a welcome discount on your first order* and be the first to know about new drops and special offers.">
+      Подпишитесь на нашу рассылку, чтобы получить приветственную скидку на первый заказ* и первыми узнавать о новостях и специальных предложениях.
+    </p>
+    
+    <div style="font-size: 11px; color: var(--sold); text-align: left; margin-bottom: 24px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px;">
+      <span data-ru="* не распространяется на раздел АРТ, БЕЛЬЕ, а также на товары со скидкой" data-en="* does not apply to ART, UNDERWEAR, and sale items">* не распространяется на раздел АРТ, БЕЛЬЕ, а также на товары со скидкой</span>
+      <span data-ru="* действует при покупке от 35000 ₸" data-en="* valid on purchases over 35,000 ₸">* действует при покупке от 35000 ₸</span>
+    </div>
+
+    <form id="newsletter-modal-form">
+      <div class="form-group" style="margin-bottom: 20px;">
+        <input type="email" id="newsletter-modal-email" required data-placeholder-ru="Введите свой адрес электронной почты" data-placeholder-en="Enter your email address" placeholder="Введите свой адрес электронной почты" style="width: 100%; text-align: center;">
+      </div>
+      
+      <div style="text-align: left; margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px;">
+        <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 11px; color: var(--brown); cursor: pointer; line-height: 1.4; text-transform: none; font-weight: normal;">
+          <input type="checkbox" required style="width: auto; margin-top: 3px;">
+          <span data-ru="Я согласен(-на) с <a href='/privacy' style='text-decoration: underline; color: inherit;'>Политикой конфиденциальности</a>" data-en="I agree to the <a href='/privacy' style='text-decoration: underline; color: inherit;'>Privacy Policy</a>">Я согласен(-на) с <a href="/privacy" style="text-decoration: underline; color: inherit;">Политикой конфиденциальности</a></span>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 11px; color: var(--brown); cursor: pointer; line-height: 1.4; text-transform: none; font-weight: normal;">
+          <input type="checkbox" checked style="width: auto; margin-top: 3px;">
+          <span data-ru="Я согласен(-на) на получение рекламно-информационной рассылки" data-en="I agree to receive advertising and informational newsletters">Я согласен(-на) на получение рекламно-информационной рассылки</span>
+        </label>
+      </div>
+
+      <button class="modal-btn newsletter-modal-btn" type="submit" style="width: 100%; text-transform: uppercase; letter-spacing: 0.15em;" data-ru="ПОДПИСАТЬСЯ" data-en="SUBSCRIBE">ПОДПИСАТЬСЯ</button>
+    </form>
+  </div>
+</div>
+
 <!-- MAINTENANCE COVER OVERLAY -->
 <div class="maintenance-overlay" id="maintenance-overlay">
   <div class="maintenance-icon">🧶</div>
@@ -164,54 +345,88 @@
 <section class="hero" id="home">
   <video class="hero-video" autoplay loop muted playsinline style="display: none;"></video>
   <div class="hero-fallback">
-    <div class="hero-fallback-text">О</div>
+    <div class="hero-fallback-text">O</div>
   </div>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <p class="hero-eyebrow" data-ru="Актау → Алматы" data-en="Aktau → Almaty">Актау → Алматы</p>
-    <h1 class="hero-title"><em data-ru="Тепло" data-en="Warmth">Тепло</em><br><span data-ru="бабушкиных рук" data-en="of grandma's hands">бабушкиных рук</span></h1>
-    <p class="hero-sub" data-ru="Каждый свитер вяжется вручную бабушкой Ольгой в Актау. Потом — профессиональная съёмка с моделями в Алматы. Настоящий уют с душой." data-en="Each sweater is hand-knitted by Grandma Olga in Aktau, then photographed with professional models in Almaty. Real warmth with soul.">Каждый свитер вяжется вручную бабушкой Ольгой в Актау. Потом — профессиональная съёмка с моделями в Алматы. Настоящий уют с душой.</p>
-    <a href="#products" class="btn-primary" data-ru="Смотреть коллекцию" data-en="View Collection">Смотреть коллекцию</a>
+    <div class="hero-brand-logo">
+      <img src="/logo_hero.png" alt="Babushka Olga" class="hero-logo-img">
+    </div>
+    
+    <button class="btn-primary hero-btn" onclick="document.getElementById('products').scrollIntoView({behavior: 'smooth'})">
+      <span class="desktop-text" data-ru="Каталог" data-en="Catalog">Каталог</span>
+      <span class="mobile-text" data-ru="Смотреть каталог" data-en="View Catalog">Смотреть каталог</span>
+    </button>
+  </div>
+  
+  <div class="hero-scroll-indicator" onclick="document.getElementById('products').scrollIntoView({behavior: 'smooth'})">
+    <span class="scroll-text" data-ru="листайте вниз" data-en="scroll down">листайте вниз</span>
+    <div class="scroll-arrow">↓</div>
+  </div>
+</section>
+
+<!-- NEW DROP COUNTDOWN -->
+<section class="drop-countdown" id="drop-countdown-section" style="display:none;">
+  <div class="drop-countdown-container reveal">
+    <div class="section-label" data-ru="Новый дроп" data-en="New Drop">Новый дроп</div>
+    <h2 class="drop-title" id="drop-countdown-title" data-ru="Новая коллекция" data-en="New Collection">Новая коллекция</h2>
+    
+    <div class="countdown-timer">
+      <div class="timer-segment">
+        <span class="timer-num" id="timer-days">00</span>
+        <span class="timer-label" data-ru="дней" data-en="days">дней</span>
+      </div>
+      <div class="timer-divider">:</div>
+      <div class="timer-segment">
+        <span class="timer-num" id="timer-hours">00</span>
+        <span class="timer-label" data-ru="часов" data-en="hours">часов</span>
+      </div>
+      <div class="timer-divider">:</div>
+      <div class="timer-segment">
+        <span class="timer-num" id="timer-minutes">00</span>
+        <span class="timer-label" data-ru="минут" data-en="minutes">минут</span>
+      </div>
+      <div class="timer-divider">:</div>
+      <div class="timer-segment">
+        <span class="timer-num" id="timer-seconds">00</span>
+        <span class="timer-label" data-ru="секунд" data-en="seconds">секунд</span>
+      </div>
+    </div>
+    
+    <div class="drop-subscription">
+      <p data-ru="Подпишитесь, чтобы первыми узнать о выходе новой коллекции и получить секретную скидку." data-en="Subscribe to be the first to know about the new collection drop and receive a secret discount.">Подпишитесь, чтобы первыми узнать о выходе новой коллекции и получить секретную скидку.</p>
+      <form id="drop-subscribe-form" class="subscribe-form">
+        <input type="email" id="subscribe-email" required placeholder="email@example.com">
+        <button type="submit" class="btn-buy" data-ru="Подписаться" data-en="Subscribe">Подписаться</button>
+      </form>
+    </div>
   </div>
 </section>
 
 <!-- STORY -->
-<section class="story" id="story">
+<section class="story" id="brand">
   <div class="story-visual reveal">
     <div class="story-img-bg"><div class="story-img-icon">🧶</div></div>
+    <img src="/brand_story.png" alt="Grandma Olga knitting" class="story-img">
     <div class="story-img-overlay">
       <div class="story-img-caption" data-ru="Бабушка Ольга за работой" data-en="Grandma Olga at work">Бабушка Ольга за работой</div>
-      <div class="story-img-sub" data-ru="Актау, Казахстан" data-en="Aktau, Kazakhstan">Актау, Казахстан</div>
+      <div class="story-img-sub" data-ru="Алматы, Казахстан" data-en="Almaty, Kazakhstan">Алматы, Казахстан</div>
     </div>
   </div>
   <div class="story-text reveal">
-    <div class="section-label" data-ru="Наша история" data-en="Our Story">Наша история</div>
-    <h2 class="section-title" data-ru="Из Актау — с любовью" data-en="From Aktau — with love">Из Актау — с любовью</h2>
-    <p data-ru="<strong>Бабушка Ольга</strong> живёт на берегу Каспийского моря в Актау. Всю жизнь она вязала свитера — для семьи, для соседей, для всех, кто заглядывал на чай." data-en="<strong>Grandma Olga</strong> lives on the shore of the Caspian Sea in Aktau. She has been knitting sweaters her whole life — for family, neighbors, and everyone who stopped by for tea."><strong>Бабушка Ольга</strong> живёт на берегу Каспийского моря в Актау. Всю жизнь она вязала свитера — для семьи, для соседей, для всех, кто заглядывал на чай.</p>
-    <p data-ru="Однажды внучка привезла её работы в Алматы. Профессиональные фотографы, модели, студия — и мир увидел то, что давно знали все вокруг: <strong>это что-то особенное.</strong>" data-en="One day, her granddaughter brought her work to Almaty. Professional photographers, models, a studio — and the world finally saw what everyone around always knew: <strong>this is something special.</strong>">Однажды внучка привезла её работы в Алматы. Профессиональные фотографы, модели, студия — и мир увидел то, что давно знали все вокруг: <strong>это что-то особенное.</strong></p>
-    <div class="story-route">
-      <div class="story-route-step">
-        <div class="story-route-city">Актау</div>
-        <div class="story-route-sub" data-ru="Создание" data-en="Creation">Создание</div>
-      </div>
-      <div class="story-route-arrow">→</div>
-      <div class="story-route-step">
-        <div class="story-route-city">Алматы</div>
-        <div class="story-route-sub" data-ru="Съёмка" data-en="Shooting">Съёмка</div>
-      </div>
-      <div class="story-route-arrow">→</div>
-      <div class="story-route-step">
-        <div class="story-route-city" data-ru="Ваш дом" data-en="Your Home">Ваш дом</div>
-        <div class="story-route-sub" data-ru="Тепло" data-en="Warmth">Тепло</div>
-      </div>
-    </div>
+    <div class="section-label" data-ru="Бренд" data-en="Brand">Бренд</div>
+    <h2 class="section-title" data-ru="Made in Almaty with love" data-en="Made in Almaty with love">Made in Almaty with love</h2>
+    <div class="story-subtitle" data-ru="Основан в 2024 году" data-en="Established in 2024" style="font-size: 13px; font-weight: 300; letter-spacing: 0.1em; text-transform: uppercase; color: var(--beige-accent); margin-bottom: 24px;">Основан в 2024 году</div>
+    <p data-ru="Babushka Olga — это молодой семейный бренд, основанный бабушкой и её внучкой. Мы создаем уникальные вещи, вдохновленные традициями и современными трендами. Каждое изделие создается вручную, и мы надеемся, что вам удастся почувствовать нашу любовь и тепло в каждой детали. Благодарим вас за покупку и за поддержку нашей идеи! Нам будет приятно узнать, как наши изделия стали частью вашей жизни." data-en="Babushka Olga is a young family brand founded by a grandmother and her granddaughter. We create unique pieces inspired by traditions and modern trends. Each item is handcrafted, and we hope you feel our love and warmth in every detail. Thank you for your purchase and for supporting our vision! We would love to hear how our items have become a part of your life.">Babushka Olga — это молодой семейный бренд, основанный бабушкой и её внучкой. Мы создаем уникальные вещи, вдохновленные традициями и современными трендами. Каждое изделие создается вручную, и мы надеемся, что вам удастся почувствовать нашу любовь и тепло в каждой детали. Благодарим вас за покупку и за поддержку нашей идеи! Нам будет приятно узнать, как наши изделия стали частью вашей жизни.</p>
+    <p data-ru="Каждый свитер связан вручную из тщательно отобранных материалов. Мы создаём универсальные модели без гендерных границ — вещи, которые легко становятся частью повседневного гардероба. Баланс комфорта, функциональности и эстетики лежит в основе каждой модели." data-en="Each sweater is hand-knitted from carefully selected materials. We create versatile, gender-neutral designs—pieces that easily become part of your everyday wardrobe. The balance of comfort, functionality, and aesthetics lies at the heart of every model.">Каждый свитер связан вручную из тщательно отобранных материалов. Мы создаём универсальные модели без гендерных границ — вещи, которые легко становятся частью повседневного гардероба. Баланс комфорта, функциональности и эстетики лежит в основе каждой модели.</p>
+
   </div>
 </section>
 
 <!-- PRODUCTS -->
 <section class="products" id="products">
   <div class="section-label reveal" data-ru="Коллекция" data-en="Collection">Коллекция</div>
-  <h2 class="section-title reveal" data-ru="Свитера ручной работы" data-en="Handcrafted Sweaters">Свитера ручной работы</h2>
+  <h2 class="section-title reveal" data-ru="Каталог" data-en="Catalog">Каталог</h2>
   <div class="products-filters reveal">
     <button class="filter-btn active" data-filter="all" data-ru="Все" data-en="All">Все</button>
     <button class="filter-btn" data-filter="available" data-ru="В наличии" data-en="Available">В наличии</button>
@@ -225,46 +440,101 @@
   <div class="article-grid">
     <div class="article-sidebar reveal">
       <div class="section-label" style="color:var(--beige-accent)" data-ru="Гид по уходу" data-en="Care Guide">Гид по уходу</div>
-      <h2 class="section-title" data-ru="Правильный уход за свитером" data-en="Proper Sweater Care">Правильный уход за свитером</h2>
-      <p data-ru="Ваш свитер — не просто одежда. Это часы чужого труда, капля любви и много тепла. Следуйте этим простым правилам — и он прослужит вам долгие годы." data-en="Your sweater is not just clothing. It is hours of someone's work, a drop of love, and plenty of warmth. Follow these simple rules and it will serve you for many years.">Ваш свитер — не просто одежда. Это часы чужого труда, капля любви и много тепла. Следуйте этим простым правилам — и он прослужит вам долгие годы.</p>
+      <h2 class="section-title" data-ru="Уход за изделием" data-en="Sweater Care">Уход за изделием</h2>
+      <p data-ru="Каждый свитер связан вручную и требует бережного ухода. Соблюдение простых рекомендаций поможет сохранить форму, мягкость и внешний вид изделия на долгие годы." data-en="Each sweater is hand-knitted and requires gentle care. Following simple recommendations will help maintain the shape, softness, and appearance of the item for years to come.">Каждый свитер связан вручную и требует бережного ухода. Соблюдение простых рекомендаций поможет сохранить форму, мягкость и внешний вид изделия на долгие годы.</p>
       <div class="article-toc">
         <div class="article-toc-title" data-ru="Содержание" data-en="Contents">Содержание</div>
-        <a href="#care-wash" data-ru="Стирка" data-en="Washing">Стирка</a>
-        <a href="#care-dry" data-ru="Сушка" data-en="Drying">Сушка</a>
+        <a href="#care-wash" data-ru="Рекомендуемый уход" data-en="Recommended Care">Рекомендуемый уход</a>
+        <a href="#care-dry" data-ru="Полоскание и сушка" data-en="Rinsing & Drying">Полоскание и сушка</a>
         <a href="#care-store" data-ru="Хранение" data-en="Storage">Хранение</a>
-        <a href="#care-pilling" data-ru="Катышки" data-en="Pilling">Катышки</a>
-        <a href="#care-tips" data-ru="Секреты бабушки" data-en="Grandma's Secrets">Секреты бабушки</a>
       </div>
     </div>
     <div class="article-content reveal">
-      <h3 id="care-wash" data-ru="Стирка: нежность важнее скорости" data-en="Washing: Gentleness Over Speed">Стирка: нежность важнее скорости</h3>
-      <p data-ru="Ручная стирка — лучший выбор для шерстяных изделий. Используйте воду температурой <strong>не выше 30°C</strong> и специальное средство для деликатных тканей. Не трите и не выкручивайте — просто аккуратно отожмите." data-en="Hand washing is the best choice for wool items. Use water no hotter than <strong>30°C</strong> and a special detergent for delicate fabrics. Do not rub or wring — simply squeeze gently.">Ручная стирка — лучший выбор для шерстяных изделий. Используйте воду температурой <strong>не выше 30°C</strong> и специальное средство для деликатных тканей. Не трите и не выкручивайте — просто аккуратно отожмите.</p>
-      <div class="article-tip"><p data-ru="«Я всегда добавляю чуть-чуть кондиционера для волос — свитер становится мягким, как облако.» — Бабушка Ольга" data-en="«I always add a little hair conditioner — the sweater becomes as soft as a cloud.» — Grandma Olga">«Я всегда добавляю чуть-чуть кондиционера для волос — свитер становится мягким, как облако.» — Бабушка Ольга</p></div>
+      <h3 id="care-wash" data-ru="Рекомендуемый уход" data-en="Recommended Care">Рекомендуемый уход</h3>
+      <ul class="article-steps">
+        <li>
+          <div class="article-step-num">1</div>
+          <div class="article-step-content">
+            <strong data-ru="Профессиональный уход" data-en="Professional Care">Профессиональный уход</strong>
+            <span data-ru="Предпочтительный способ ухода — профессиональная химчистка." data-en="The preferred care method is professional dry cleaning.">Предпочтительный способ ухода — профессиональная химчистка.</span>
+          </div>
+        </li>
+        <li>
+          <div class="article-step-num">2</div>
+          <div class="article-step-content">
+            <strong data-ru="Ручная стирка" data-en="Hand Wash">Ручная стирка</strong>
+            <span data-ru="Если вы выбираете домашний уход, стирайте изделие только вручную в прохладной воде до 30°C." data-en="If you choose to wash at home, hand wash the item only in cool water (up to 30°C).">Если вы выбираете домашний уход, стирайте изделие только вручную в прохладной воде до 30°C.</span>
+          </div>
+        </li>
+        <li>
+          <div class="article-step-num">3</div>
+          <div class="article-step-content">
+            <strong data-ru="Мягкие средства" data-en="Mild Detergents">Мягкие средства</strong>
+            <span data-ru="Используйте мягкие средства, предназначенные для шерсти и деликатных тканей." data-en="Use mild detergents designed for wool and delicate fabrics.">Используйте мягкие средства, предназначенные для шерсти и деликатных тканей.</span>
+          </div>
+        </li>
+        <li>
+          <div class="article-step-num">4</div>
+          <div class="article-step-content">
+            <strong data-ru="Бережное отношение" data-en="Gentle Handling">Бережное отношение</strong>
+            <span data-ru="Не замачивайте изделие надолго и избегайте интенсивного трения." data-en="Do not soak the item for too long and avoid rubbing it vigorously.">Не замачивайте изделие надолго и избегайте интенсивного трения.</span>
+          </div>
+        </li>
+      </ul>
 
-      <h3 id="care-dry" data-ru="Сушка: горизонталь — ваш друг" data-en="Drying: Horizontal is Your Friend">Сушка: горизонталь — ваш друг</h3>
-      <p data-ru="Никогда не вешайте мокрый свитер на плечики — он вытянется. Положите его на ровную поверхность, придайте нужную форму и дайте высохнуть <strong>вдали от прямых солнечных лучей</strong>." data-en="Never hang a wet sweater on a hanger — it will stretch. Lay it flat, reshape it gently, and let it dry <strong>away from direct sunlight</strong>.">Никогда не вешайте мокрый свитер на плечики — он вытянется. Положите его на ровную поверхность, придайте нужную форму и дайте высохнуть <strong>вдали от прямых солнечных лучей</strong>.</p>
+      <h3 id="care-dry" data-ru="Полоскание и сушка" data-en="Rinsing & Drying">Полоскание и сушка</h3>
+      <ul class="article-steps">
+        <li>
+          <div class="article-step-num">1</div>
+          <div class="article-step-content">
+            <strong data-ru="Полоскание" data-en="Rinsing">Полоскание</strong>
+            <span data-ru="Тщательно прополощите свитер в чистой воде." data-en="Rinse the sweater thoroughly in clean water.">Тщательно прополощите свитер в чистой воде.</span>
+          </div>
+        </li>
+        <li>
+          <div class="article-step-num">2</div>
+          <div class="article-step-content">
+            <strong data-ru="Удаление влаги" data-en="Moisture Removal">Удаление влаги</strong>
+            <span data-ru="Не выкручивайте и не отжимайте изделие. Аккуратно удалите лишнюю влагу полотенцем." data-en="Do not wring or tumble dry the item. Gently squeeze out excess water using a towel.">Не выкручивайте и не отжимайте изделие. Аккуратно удалите лишнюю влагу полотенцем.</span>
+          </div>
+        </li>
+        <li>
+          <div class="article-step-num">3</div>
+          <div class="article-step-content">
+            <strong data-ru="Горизонтальная сушка" data-en="Flat Drying">Горизонтальная сушка</strong>
+            <span data-ru="Сушите только в горизонтальном положении вдали от прямых солнечных лучей и источников тепла." data-en="Dry flat, away from direct sunlight and heating devices.">Сушите только в горизонтальном положении вдали от прямых солнечных лучей и источников тепла.</span>
+          </div>
+        </li>
+        <li>
+          <div class="article-step-num">4</div>
+          <div class="article-step-content">
+            <strong data-ru="Без машинной сушки" data-en="No Tumble Dry">Без машинной сушки</strong>
+            <span data-ru="Не используйте сушильную машину." data-en="Do not use a tumble dryer.">Не используйте сушильную машину.</span>
+          </div>
+        </li>
+      </ul>
 
       <h3 id="care-store" data-ru="Хранение" data-en="Storage">Хранение</h3>
       <ul class="article-steps">
         <li>
           <div class="article-step-num">1</div>
-          <div class="article-step-content"><strong data-ru="Складывайте, не вешайте" data-en="Fold, don't hang">Складывайте, не вешайте</strong><span data-ru="Шерсть тянется под собственным весом. Аккуратно сложите и уберите в ящик или на полку." data-en="Wool stretches under its own weight. Fold neatly and place in a drawer or on a shelf.">Шерсть тянется под собственным весом. Аккуратно сложите и уберите в ящик или на полку.</span></div>
+          <div class="article-step-content">
+            <strong data-ru="Сложенный вид" data-en="Folded Storage">Сложенный вид</strong>
+            <span data-ru="Храните свитер в сложенном виде в сухом и прохладном месте." data-en="Store the sweater folded in a dry and cool place.">Храните свитер в сложенном виде в сухом и прохладном месте.</span>
+          </div>
         </li>
         <li>
           <div class="article-step-num">2</div>
-          <div class="article-step-content"><strong data-ru="Защита от моли" data-en="Moth protection">Защита от моли</strong><span data-ru="Лавандовые саше или кедровые блоки рядом со свитерами — натуральная и ароматная защита." data-en="Lavender sachets or cedar blocks near your sweaters — natural and fragrant protection.">Лавандовые саше или кедровые блоки рядом со свитерами — натуральная и ароматная защита.</span></div>
-        </li>
-        <li>
-          <div class="article-step-num">3</div>
-          <div class="article-step-content"><strong data-ru="Дышащий пакет" data-en="Breathable bag">Дышащий пакет</strong><span data-ru="Для долгого хранения используйте тканевые мешки — никакого пластика, шерсть должна дышать." data-en="For long-term storage, use fabric bags — no plastic, wool needs to breathe.">Для долгого хранения используйте тканевые мешки — никакого пластика, шерсть должна дышать.</span></div>
+          <div class="article-step-content">
+            <strong data-ru="Без вешалок" data-en="No Hangers">Без вешалок</strong>
+            <span data-ru="Не рекомендуется длительное хранение на плечиках, чтобы избежать деформации." data-en="Do not store on hangers for long periods to prevent stretching and deformation.">Не рекомендуется длительное хранение на плечиках, чтобы избежать деформации.</span>
+          </div>
         </li>
       </ul>
 
-      <h3 id="care-pilling" data-ru="Катышки — это нормально" data-en="Pilling Is Normal">Катышки — это нормально</h3>
-      <p data-ru="Натуральная шерсть может давать катышки в местах трения. Это признак качества, а не дефект. Аккуратно удалите их <strong>специальным триммером для трикотажа</strong> или бритвой." data-en="Natural wool may pill in areas of friction. This is a sign of quality, not a defect. Remove them carefully with a <strong>fabric shaver</strong> or a razor.">Натуральная шерсть может давать катышки в местах трения. Это признак качества, а не дефект. Аккуратно удалите их <strong>специальным триммером для трикотажа</strong> или бритвой.</p>
-
-      <h3 id="care-tips" data-ru="Секреты бабушки Ольги" data-en="Grandma Olga's Secrets">Секреты бабушки Ольги</h3>
-      <p data-ru="Помимо кондиционера, есть ещё один секрет: перед первой ноской положите свитер в пакет и уберите в морозилку на 24 часа. Волоски «сцепятся» крепче, и свитер будет меньше пилинговаться. И помните — шерсть любит воздух. Не держите её взаперти, давайте свитеру «подышать» на балконе в прохладную погоду." data-en="Besides the conditioner, there is another secret: before the first wear, put the sweater in a bag and place it in the freezer for 24 hours. The fibers will lock tighter, reducing pilling. And remember — wool loves fresh air. Do not keep it locked away; let it breathe on the balcony in cool weather.">Помимо кондиционера, есть ещё один секрет: перед первой ноской положите свитер в пакет и уберите в морозилку на 24 часа. Волоски «сцепятся» крепче, и свитер будет меньше пилинговаться. И помните — шерсть любит воздух. Не держите её взаперти, давайте свитеру «подышать» на балконе в прохладную погоду.</p>
+      <div class="article-tip" style="margin-top: 32px;">
+        <p data-ru="Бережный уход позволит вашему свитеру сохранить комфорт, форму и красоту на долгие годы." data-en="Gentle care will allow your sweater to maintain comfort, shape, and beauty for years to come.">Бережный уход позволит вашему свитеру сохранить комфорт, форму и красоту на долгие годы.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -279,8 +549,8 @@
 <!-- THANK YOU -->
 <section class="thankyou" id="thankyou">
   <div class="thankyou-icon">🤍</div>
-  <h2 class="section-title" data-ru="Спасибо, что выбираете тепло" data-en="Thank you for choosing warmth">Спасибо, что выбираете тепло</h2>
-  <p data-ru="Каждая петелька связана с заботой в маленькой квартире в Актау. Пусть этот свитер греет вас в самые холодные дни, дарит ощущение дома и напоминает о главном." data-en="Every stitch is knitted with care in a cozy apartment in Aktau. May this sweater warm you on the coldest days, bring a feeling of home, and remind you of what matters most.">Каждая петелька связана с заботой в маленькой квартире в Актау. Пусть этот свитер греет вас в самые холодные дни, дарит ощущение дома и напоминает о главном.</p>
+  <h2 class="section-title" data-ru="Спасибо за ваш выбор" data-en="Thank you for your choice">Спасибо за ваш выбор</h2>
+  <p data-ru="Мы — маленький семейный бренд, и каждый ваш заказ имеет значение. Спасибо, что выбираете ручную работу, цените качество и поддерживаете наше дело." data-en="We are a small family brand, and every order you place means the world to us. Thank you for choosing handmade, valuing quality, and supporting our work.">Мы — маленький семейный бренд, и каждый ваш заказ имеет значение. Спасибо, что выбираете ручную работу, цените качество и поддерживаете наше дело.</p>
   <div class="thankyou-divider"></div>
   <div class="thankyou-signature">С любовью, Ольга</div>
 </section>
@@ -289,8 +559,8 @@
 <footer>
   <div class="footer-grid">
     <div class="footer-brand">
-      <a href="#" class="nav-logo">Бабушка Ольга</a>
-      <p data-ru="Вязаные вручную изделия из Актау. Создано для уюта." data-en="Hand-knitted items from Aktau. Made for comfort.">Вязаные вручную изделия из Актау. Создано для уюта.</p>
+      <a href="/" class="nav-logo">Babushka Olga</a>
+      <p data-ru="Вязаные вручную изделия из Алматы." data-en="Hand-knitted items from Almaty.">Вязаные вручную изделия из Алматы.</p>
     </div>
     <div class="footer-col">
       <h4 data-ru="Навигация" data-en="Navigation">Навигация</h4>
@@ -306,12 +576,12 @@
     </div>
     <div class="footer-col">
       <h4 data-ru="Производство" data-en="Production">Производство</h4>
-      <p style="font-size:13px; color:rgba(253,250,246,0.5); line-height:1.7" data-ru="Вязка: г. Актау<br>Студия: г. Алматы" data-en="Knitting: Aktau<br>Photo Studio: Almaty">Вязка: г. Актау<br>Студия: г. Алматы</p>
+      <p style="font-size:13px; color:rgba(253,250,246,0.5); line-height:1.7" data-ru="Ручная работа: г. Алматы<br>Студия: г. Алматы" data-en="Handmade: Almaty<br>Photo Studio: Almaty">Ручная работа: г. Алматы<br>Студия: г. Алматы</p>
     </div>
   </div>
   <div class="footer-bottom">
     <p>&copy; 2026 Бабушка Ольга. All rights reserved.</p>
-    <p style="font-size:11px" data-ru="Сделано с душой" data-en="Made with soul">Сделано с душой</p>
+    <p style="font-size:11px" data-ru="Made in Almaty with love" data-en="Made in Almaty with love">Made in Almaty with love</p>
   </div>
 </footer>
 
@@ -369,6 +639,7 @@
       <button class="admin-tab" onclick="switchAdminTab('add')">Добавить товар</button>
       <button class="admin-tab" onclick="switchAdminTab('archive')">Архив продаж</button>
       <button class="admin-tab" onclick="switchAdminTab('orders')">Заказы</button>
+      <button class="admin-tab" onclick="switchAdminTab('settings')">Настройки дропа</button>
     </div>
 
     <!-- PRODUCTS TAB -->
@@ -468,11 +739,11 @@
 
         <div class="form-group">
           <label>Описание (рус)</label>
-          <textarea id="f-desc-ru" placeholder="Уютный свитер крупной вязки..."></textarea>
+          <textarea id="f-desc-ru" placeholder="Свитер ручной работы крупной вязки..."></textarea>
         </div>
         <div class="form-group">
           <label>Описание (eng)</label>
-          <textarea id="f-desc-en" placeholder="Cozy chunky knit sweater..."></textarea>
+          <textarea id="f-desc-en" placeholder="Handcrafted chunky knit sweater..."></textarea>
         </div>
         <div class="form-actions">
           <button class="btn-save" onclick="saveProduct()">Сохранить</button>
@@ -494,6 +765,7 @@
               <th>Название</th>
               <th>Цена</th>
               <th>Статус</th>
+              <th>Действия</th>
             </tr>
           </thead>
           <tbody id="admin-archive-tbody"></tbody>
@@ -515,9 +787,91 @@
               <th>Сумма</th>
               <th>Статус</th>
               <th>Дата</th>
+              <th>Действия</th>
             </tr>
           </thead>
           <tbody id="admin-orders-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="admin-section" id="admin-settings">
+      <div class="admin-products-header">
+        <h2>Настройки дропа и подписки</h2>
+      </div>
+      <div class="admin-form" style="max-width: 800px; margin-bottom: 30px; border: 1px solid var(--beige-mid);">
+        <h3>Параметры обратного отсчета</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Название дропа (рус)</label>
+            <input type="text" id="drop-settings-title-ru" placeholder="Новая коллекция...">
+          </div>
+          <div class="form-group">
+            <label>Название дропа (eng)</label>
+            <input type="text" id="drop-settings-title-en" placeholder="New Collection...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Дата и время запуска (местное время)</label>
+            <input type="datetime-local" id="drop-settings-date">
+          </div>
+          <div class="form-group">
+            <label>Статус таймера</label>
+            <div style="display: flex; gap: 16px; align-items: center; margin-top: 10px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer; text-transform: none; color: var(--dark);">
+                <input type="checkbox" id="drop-settings-active" style="width: auto;"> Включить таймер на сайте
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="form-actions" style="margin-top: 20px;">
+          <button class="btn-save" onclick="saveDropSettingsAdmin()">Сохранить настройки</button>
+        </div>
+      </div>
+
+      <div class="admin-form" style="max-width: 800px; margin-bottom: 30px; border: 1px solid var(--beige-mid);">
+        <h3>Изображения (Медиа)</h3>
+        <div class="form-row" style="grid-template-columns: repeat(2, 1fr); gap: 20px;">
+          <div class="form-group">
+            <label>Логотип бренда (Hero Logo)</label>
+            <div class="media-slot" id="media-slot-logo-hero" style="max-width: 100%; aspect-ratio: 3/1; height: auto;">
+              <span class="media-slot-icon">➕</span>
+              <span class="media-slot-label">Загрузить логотип</span>
+              <img class="media-slot-preview" style="display:none; object-fit: contain; width: 100%; height: 100%;" />
+              <input type="file" id="upload-logo-hero" accept="image/*">
+              <div class="media-slot-progress" style="width: 0%"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Бабушка Ольга за работой (Brand Story)</label>
+            <div class="media-slot" id="media-slot-brand-story" style="max-width: 100%; aspect-ratio: 1/1; height: auto;">
+              <span class="media-slot-icon">➕</span>
+              <span class="media-slot-label">Загрузить картинку</span>
+              <img class="media-slot-preview" style="display:none; object-fit: cover; width: 100%; height: 100%;" />
+              <input type="file" id="upload-brand-story" accept="image/*">
+              <div class="media-slot-progress" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="admin-products-header" style="margin-top: 40px;">
+        <h2>База подписчиков</h2>
+        <button class="btn-add" onclick="exportSubscribersCSV()">Экспорт в CSV</button>
+      </div>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Дата подписки</th>
+            </tr>
+          </thead>
+          <tbody id="admin-subscribers-tbody">
+            <!-- Dynamic subscribers list -->
+          </tbody>
         </table>
       </div>
     </div>
@@ -525,7 +879,7 @@
 </div>
 
 <!-- ADMIN TRIGGER BUTTON -->
-<button class="admin-trigger" title="Панель администратора">⚙</button>
+<button class="admin-trigger" title="Панель администратора" style="display: none !important;">⚙</button>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>

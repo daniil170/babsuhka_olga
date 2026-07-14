@@ -1,10 +1,10 @@
-// Admin Panel Controller Module
 import { 
-  saveProduct, deleteProduct, setMaintenanceMode, 
+  saveProduct, deleteProduct, 
   subscribeOrders, updateOrderStatus, subscribeProducts,
   loginAdmin, logoutAdmin, subscribeAuthState,
-  registerAdmin, resetAdminPassword, updateHeroVideo,
-  subscribeHeroVideo
+  resetAdminPassword, saveDropSettings, subscribeDropSettings,
+  subscribeSubscribers, subscribeGlobalSettings, updateGlobalSettings,
+  deleteOrder
 } from './firebase.js';
 import { uploadMedia } from './cloudinary.js';
 
@@ -12,8 +12,11 @@ let allProducts = [];
 let currentAdminUser = null;
 let currentMaintenanceState = false;
 let orderSubscriptionUnsubscribe = null;
+let dropSettingsSubscriptionUnsubscribe = null;
+let subscribersSubscriptionUnsubscribe = null;
+let subscribersList = [];
 let authMode = 'login';
-let currentHeroVideoUrl = '';
+let currentGlobalSettings = {};
 
 // DOM Elements cache
 let elements = {};
@@ -37,16 +40,63 @@ export function initAdminPanel() {
     }
   });
 
-  // Subscribe to Hero Video for admin buttons state
-  subscribeHeroVideo((url) => {
-    currentHeroVideoUrl = url;
+  // Subscribe to Global Settings for admin
+  subscribeGlobalSettings((settings) => {
+    currentGlobalSettings = settings;
+    currentMaintenanceState = settings.maintenanceMode || false;
+    
+    // Update maintenance button state
+    if (elements.maintenanceBtn) {
+      elements.maintenanceBtn.textContent = currentMaintenanceState ? 'Выкл. тех-обслуживание' : 'Вкл. тех-обслуживание';
+      elements.maintenanceBtn.classList.toggle('active', currentMaintenanceState);
+    }
+    
+    // Update hero video buttons
+    const heroUrl = settings.heroVideoUrl || '';
     if (elements.heroVideoPreviewBtn && elements.heroVideoDeleteBtn) {
-      if (url) {
+      if (heroUrl) {
         elements.heroVideoPreviewBtn.style.display = 'inline-block';
         elements.heroVideoDeleteBtn.style.display = 'inline-block';
       } else {
         elements.heroVideoPreviewBtn.style.display = 'none';
         elements.heroVideoDeleteBtn.style.display = 'none';
+      }
+    }
+
+    // Update images in Settings panel slots
+    const logoSlot = document.getElementById('media-slot-logo-hero');
+    if (logoSlot) {
+      const logoPreview = logoSlot.querySelector('.media-slot-preview');
+      if (settings.logoHeroImageUrl) {
+        logoSlot.dataset.uploadedUrl = settings.logoHeroImageUrl;
+        if (logoPreview) {
+          logoPreview.src = settings.logoHeroImageUrl;
+          logoPreview.style.display = 'block';
+        }
+      } else {
+        delete logoSlot.dataset.uploadedUrl;
+        if (logoPreview) {
+          logoPreview.src = '';
+          logoPreview.style.display = 'none';
+        }
+      }
+    }
+
+    const storySlot = document.getElementById('media-slot-brand-story');
+    if (storySlot) {
+      const storyPreview = storySlot.querySelector('.media-slot-preview');
+      if (settings.brandStoryImageUrl) {
+        storySlot.dataset.uploadedUrl = settings.brandStoryImageUrl;
+        if (storyPreview) {
+          storyPreview.src = settings.brandStoryImageUrl;
+          storyPreview.style.display = 'block';
+        }
+      } else {
+        delete storySlot.dataset.uploadedUrl;
+        if (storyPreview) {
+          storyPreview.src = '';
+          storyPreview.style.display = 'none';
+        }
       }
     }
   });
@@ -101,7 +151,14 @@ function cacheElements() {
     heroVideoPreviewPlayer: document.getElementById('hero-video-preview-player'),
     
     // Orders
-    ordersTbody: document.getElementById('admin-orders-tbody')
+    ordersTbody: document.getElementById('admin-orders-tbody'),
+    
+    // Settings Tab Elements
+    dropTitleRu: document.getElementById('drop-settings-title-ru'),
+    dropTitleEn: document.getElementById('drop-settings-title-en'),
+    dropDate: document.getElementById('drop-settings-date'),
+    dropActive: document.getElementById('drop-settings-active'),
+    subscribersTbody: document.getElementById('admin-subscribers-tbody')
   };
 }
 
@@ -116,27 +173,30 @@ function switchAuthMode(mode) {
     elements.loginPassword.required = true;
     elements.loginSubmitBtn.textContent = 'Войти';
     
-    elements.linkForgotPassword.style.display = 'block';
-    elements.linkRegister.style.display = 'block';
-    elements.linkBackToLogin.style.display = 'none';
+    if (elements.linkForgotPassword) elements.linkForgotPassword.style.display = 'block';
+    if (elements.linkRegister) elements.linkRegister.style.display = 'none'; // disabled for security
+    if (elements.linkBackToLogin) elements.linkBackToLogin.style.display = 'none';
   } else if (mode === 'register') {
-    elements.loginModalTitle.textContent = 'Регистрация';
-    elements.loginPasswordGroup.style.display = 'block';
-    elements.loginPassword.required = true;
-    elements.loginSubmitBtn.textContent = 'Зарегистрироваться';
+    elements.loginModalTitle.textContent = 'Регистрация отключена';
+    elements.loginPasswordGroup.style.display = 'none';
+    elements.loginPassword.required = false;
+    if (elements.loginSubmitBtn) elements.loginSubmitBtn.style.display = 'none';
     
-    elements.linkForgotPassword.style.display = 'none';
-    elements.linkRegister.style.display = 'none';
-    elements.linkBackToLogin.style.display = 'block';
+    if (elements.linkForgotPassword) elements.linkForgotPassword.style.display = 'none';
+    if (elements.linkRegister) elements.linkRegister.style.display = 'none';
+    if (elements.linkBackToLogin) elements.linkBackToLogin.style.display = 'block';
   } else if (mode === 'forgot') {
     elements.loginModalTitle.textContent = 'Сброс пароля';
     elements.loginPasswordGroup.style.display = 'none';
     elements.loginPassword.required = false;
-    elements.loginSubmitBtn.textContent = 'Сбросить пароль';
+    if (elements.loginSubmitBtn) {
+      elements.loginSubmitBtn.style.display = 'block';
+      elements.loginSubmitBtn.textContent = 'Сбросить пароль';
+    }
     
-    elements.linkForgotPassword.style.display = 'none';
-    elements.linkRegister.style.display = 'none';
-    elements.linkBackToLogin.style.display = 'block';
+    if (elements.linkForgotPassword) elements.linkForgotPassword.style.display = 'none';
+    if (elements.linkRegister) elements.linkRegister.style.display = 'none';
+    if (elements.linkBackToLogin) elements.linkBackToLogin.style.display = 'block';
   }
 }
 
@@ -155,9 +215,7 @@ function setupEventListeners() {
           closeLoginModal();
           openAdminPanel();
         } else if (authMode === 'register') {
-          await registerAdmin(email, password);
-          window.showToast('Регистрация успешна! Теперь вы можете войти.');
-          switchAuthMode('login');
+          throw new Error('Регистрация новых администраторов через сайт отключена для безопасности.');
         } else if (authMode === 'forgot') {
           await resetAdminPassword(email);
           window.showToast('Ссылка для сброса пароля отправлена (или сымитирована)');
@@ -203,7 +261,7 @@ function setupEventListeners() {
           if (progressDiv) progressDiv.textContent = `${percent}%`;
         });
         
-        await updateHeroVideo(secureUrl);
+        await updateGlobalSettings({ heroVideoUrl: secureUrl });
         window.showToast('Hero-видео успешно загружено и обновлено!');
       } catch (err) {
         console.error(err);
@@ -219,11 +277,23 @@ function setupEventListeners() {
     });
   }
 
+  // Setup Logo Hero Image Upload Listener
+  const logoInput = document.getElementById('upload-logo-hero');
+  if (logoInput) {
+    logoInput.addEventListener('change', (e) => handleSettingImageUpload(e, 'logoHeroImageUrl', 'media-slot-logo-hero'));
+  }
+
+  // Setup Brand Story Image Upload Listener
+  const storyInput = document.getElementById('upload-brand-story');
+  if (storyInput) {
+    storyInput.addEventListener('change', (e) => handleSettingImageUpload(e, 'brandStoryImageUrl', 'media-slot-brand-story'));
+  }
+
   // Hero Video Preview Handler
   if (elements.heroVideoPreviewBtn) {
     elements.heroVideoPreviewBtn.onclick = () => {
-      if (elements.heroVideoPreviewPlayer && currentHeroVideoUrl) {
-        elements.heroVideoPreviewPlayer.src = currentHeroVideoUrl;
+      if (elements.heroVideoPreviewPlayer && currentGlobalSettings.heroVideoUrl) {
+        elements.heroVideoPreviewPlayer.src = currentGlobalSettings.heroVideoUrl;
         elements.heroVideoPreviewPlayer.load();
         elements.heroVideoPreviewPlayer.play().catch(err => {
           console.warn('Preview video play blocked or failed:', err);
@@ -240,7 +310,7 @@ function setupEventListeners() {
     elements.heroVideoDeleteBtn.onclick = async () => {
       if (confirm('Вы уверены, что хотите удалить текущее Hero-видео?')) {
         try {
-          await updateHeroVideo('');
+          await updateGlobalSettings({ heroVideoUrl: '' });
           window.showToast('Hero-видео успешно удалено!');
         } catch (err) {
           console.error(err);
@@ -302,6 +372,26 @@ export function openAdminPanel() {
       renderOrders(orders);
     });
   }
+
+  // Subscribe to Drop Settings
+  if (!dropSettingsSubscriptionUnsubscribe) {
+    dropSettingsSubscriptionUnsubscribe = subscribeDropSettings((settings) => {
+      if (settings) {
+        if (elements.dropTitleRu) elements.dropTitleRu.value = settings.title?.ru || '';
+        if (elements.dropTitleEn) elements.dropTitleEn.value = settings.title?.en || '';
+        if (elements.dropDate) elements.dropDate.value = settings.date || '';
+        if (elements.dropActive) elements.dropActive.checked = !!settings.active;
+      }
+    });
+  }
+
+  // Subscribe to Subscribers list
+  if (!subscribersSubscriptionUnsubscribe) {
+    subscribersSubscriptionUnsubscribe = subscribeSubscribers((subs) => {
+      subscribersList = subs;
+      renderSubscribers(subs);
+    });
+  }
   
   switchAdminTab('products');
 }
@@ -314,6 +404,14 @@ export function closeAdminPanel() {
   if (orderSubscriptionUnsubscribe) {
     orderSubscriptionUnsubscribe();
     orderSubscriptionUnsubscribe = null;
+  }
+  if (dropSettingsSubscriptionUnsubscribe) {
+    dropSettingsSubscriptionUnsubscribe();
+    dropSettingsSubscriptionUnsubscribe = null;
+  }
+  if (subscribersSubscriptionUnsubscribe) {
+    subscribersSubscriptionUnsubscribe();
+    subscribersSubscriptionUnsubscribe = null;
   }
 }
 
@@ -403,6 +501,34 @@ async function handleFileSelect(event, type, index = null) {
     console.error(err);
     window.showToast('Ошибка загрузки медиа');
     if (progressBar) progressBar.style.width = '0%';
+  }
+}
+
+async function handleSettingImageUpload(event, settingsKey, slotId) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const slotElement = document.getElementById(slotId);
+  if (!slotElement) return;
+
+  const progressBar = slotElement.querySelector('.media-slot-progress');
+  const previewImg = slotElement.querySelector('.media-slot-preview');
+  
+  if (progressBar) progressBar.style.width = '0%';
+  
+  try {
+    const secureUrl = await uploadMedia(file, 'image', (percent) => {
+      if (progressBar) progressBar.style.width = `${percent}%`;
+    });
+    
+    await updateGlobalSettings({ [settingsKey]: secureUrl });
+    window.showToast('Изображение успешно обновлено!');
+  } catch (err) {
+    console.error(err);
+    window.showToast('Ошибка при загрузке изображения');
+  } finally {
+    if (progressBar) progressBar.style.width = '0%';
+    event.target.value = '';
   }
 }
 
@@ -626,9 +752,14 @@ function renderAdminArchive() {
         <td><strong>${p.name.ru}</strong><br><small style="color:var(--sold)">${p.name.en}</small></td>
         <td>${p.price.toLocaleString('ru-RU')} ₸</td>
         <td><span style="background:var(--dark);color:white;padding:3px 10px;font-size:11px;letter-spacing:0.1em">ПРОДАНО</span></td>
+        <td>
+          <div class="table-actions">
+            <button class="btn-delete" onclick="deleteProduct('${p.id}')">Удалить</button>
+          </div>
+        </td>
       </tr>
     `;
-  }).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--sold);padding:32px;font-style:italic">Архив пуст</td></tr>`;
+  }).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--sold);padding:32px;font-style:italic">Архив пуст</td></tr>`;
 }
 
 function renderOrders(orders) {
@@ -652,16 +783,25 @@ function renderOrders(orders) {
       </select>
     `;
 
+    const discountInfo = o.discountAmount && o.discountAmount > 0
+      ? `<br><span style="font-size:11px;color:#27ae60;font-weight:normal">(скидка ${o.discountAmount.toLocaleString('ru-RU')} ₸)</span>`
+      : '';
+
     return `
       <tr style="${o.status === 'completed' ? 'opacity: 0.6' : ''}">
         <td><strong>${o.customerName}</strong><br><a href="tel:${o.customerPhone}" style="color:var(--brown);font-size:12px;text-decoration:none">${o.customerPhone}</a></td>
         <td><div style="font-size:13px;line-height:1.4">${itemsHtml}</div></td>
-        <td><strong>${o.totalPrice.toLocaleString('ru-RU')} ₸</strong></td>
+        <td><strong>${o.totalPrice.toLocaleString('ru-RU')} ₸</strong>${discountInfo}</td>
         <td>${statusSelect}</td>
         <td><small style="color:var(--sold)">${dateStr}</small></td>
+        <td>
+          <div class="table-actions">
+            <button class="btn-delete" onclick="window.deleteOrder('${o.id}')">Удалить</button>
+          </div>
+        </td>
       </tr>
     `;
-  }).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--sold);padding:48px;font-style:italic">Новых заказов нет</td></tr>`;
+  }).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--sold);padding:48px;font-style:italic">Новых заказов нет</td></tr>`;
 }
 
 export async function updateOrderState(orderId, newStatus) {
@@ -674,6 +814,18 @@ export async function updateOrderState(orderId, newStatus) {
   }
 }
 window.updateOrderState = updateOrderState;
+
+export async function deleteOrderClick(id) {
+  if (!confirm('Удалить заказ? Это действие необратимо.')) return;
+  try {
+    await deleteOrder(id);
+    window.showToast('Заказ удалён');
+  } catch (err) {
+    console.error(err);
+    window.showToast('Ошибка удаления заказа');
+  }
+}
+window.deleteOrder = deleteOrderClick;
 
 // ── 5. MAINTENANCE MODE CONTROL ──
 
@@ -692,12 +844,66 @@ export function setupMaintenanceButton(state) {
       
     if (confirm(confirmMsg)) {
       try {
-        await setMaintenanceMode(nextState);
-        window.showToast('Техническое обслуживание обновлено');
+        await updateGlobalSettings({ maintenanceMode: nextState });
+        window.showToast(nextState ? 'Тех-обслуживание включено' : 'Сайт открыт для пользователей');
       } catch (err) {
         console.error(err);
-        window.showToast('Ошибка изменения режима обслуживания');
+        window.showToast('Ошибка изменения режима');
       }
     }
   };
 }
+
+function renderSubscribers(subs) {
+  if (!elements.subscribersTbody) return;
+  elements.subscribersTbody.innerHTML = subs.map(s => {
+    const dateStr = s.createdAt ? new Date(s.createdAt).toLocaleString('ru-RU') : '—';
+    return `
+      <tr>
+        <td><strong>${s.email}</strong></td>
+        <td><small style="color:var(--sold)">${dateStr}</small></td>
+      </tr>
+    `;
+  }).join('') || `<tr><td colspan="2" style="text-align:center;color:var(--sold);padding:24px;font-style:italic">Подписчиков нет</td></tr>`;
+}
+
+export async function saveDropSettingsAdmin() {
+  const titleRu = elements.dropTitleRu.value.trim();
+  const titleEn = elements.dropTitleEn.value.trim();
+  const dateStr = elements.dropDate.value;
+  const active = elements.dropActive.checked;
+  
+  if (!titleRu || !titleEn || !dateStr) {
+    window.showToast('Заполните все параметры таймера');
+    return;
+  }
+  
+  try {
+    await saveDropSettings(titleRu, titleEn, dateStr, active);
+    window.showToast('Настройки дропа успешно сохранены!');
+  } catch (err) {
+    console.error(err);
+    window.showToast('Ошибка сохранения настроек');
+  }
+}
+window.saveDropSettingsAdmin = saveDropSettingsAdmin;
+
+export function exportSubscribersCSV() {
+  if (subscribersList.length === 0) {
+    window.showToast('Нет подписчиков для экспорта');
+    return;
+  }
+  let csvContent = "data:text/csv;charset=utf-8,Email,Date\n";
+  subscribersList.forEach(s => {
+    const dateStr = s.createdAt ? new Date(s.createdAt).toISOString() : '';
+    csvContent += `"${s.email}","${dateStr}"\n`;
+  });
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `subscribers_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+window.exportSubscribersCSV = exportSubscribersCSV;
