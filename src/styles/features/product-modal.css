@@ -1,0 +1,67 @@
+/* ── PRODUCT DETAILS MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(26,26,26,0.6); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 24px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--white); max-width: 900px; width: 100%;
+  max-height: 90vh; overflow-y: auto; position: relative;
+  animation: modalIn 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes modalIn { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform: none; } }
+.modal-close {
+  position: absolute; top: 20px; right: 20px; background: none; border: none;
+  font-size: 24px; cursor: pointer; color: var(--brown); z-index: 1;
+  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: var(--dark); }
+.modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.modal-images { position: relative; height: 520px; overflow: hidden; }
+.modal-img-main {
+  width: 100%; height: 100%; object-fit: cover;
+  display: flex; align-items: center; justify-content: center; font-size: 100px;
+  transition: opacity 0.4s;
+}
+.modal-thumbs { position: absolute; bottom: 16px; left: 16px; display: flex; gap: 8px; z-index: 5; }
+.modal-thumb {
+  width: 56px; height: 56px; border: 2px solid transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+  background: rgba(245,240,232,0.9); transition: border-color var(--transition);
+  background-size: cover; background-position: center;
+}
+.modal-thumb.active { border-color: var(--dark); }
+.modal-info { padding: 48px 40px; display: flex; flex-direction: column; }
+.modal-tag { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--beige-accent); margin-bottom: 12px; }
+.modal-name { font-family: var(--font-body); font-size: 28px; font-weight: 500; margin-bottom: 8px; line-height: 1.2; }
+.modal-material { font-size: 12px; letter-spacing: 0.12em; color: var(--sold); text-transform: uppercase; margin-bottom: 24px; }
+.modal-price { font-family: var(--font-body); font-size: 28px; font-weight: 500; margin-bottom: 8px; }
+.modal-price span { font-size: 16px; color: var(--brown); }
+.modal-divider { height: 1px; background: var(--beige-mid); margin: 24px 0; }
+.modal-section-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--brown); margin-bottom: 12px; }
+.modal-sizes { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.modal-size {
+  width: 40px; height: 40px; border: 1px solid var(--beige-mid);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; cursor: pointer; transition: all var(--transition); color: var(--brown);
+}
+.modal-size:hover, .modal-size.selected { border-color: var(--dark); background: var(--dark); color: var(--white); }
+.modal-desc { font-size: 14px; font-weight: 300; color: var(--brown); line-height: 1.85; margin-bottom: 32px; flex-grow: 1; }
+.modal-btn { padding: 18px; background: var(--dark); color: var(--white); border: none; cursor: pointer; font-size: 12px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; width: 100%; transition: background var(--transition); }
+.modal-btn:hover { background: var(--brown); }
+
+@media (max-width: 900px) {
+  .modal-body { grid-template-columns: 1fr; }
+  .modal-images { height: 340px; }
+}
+
+@media (max-width: 600px) {
+  .modal { max-height: 100dvh; border-radius: 0; margin: 0; max-width: 100%; }
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .modal-body { grid-template-columns: 1fr; }
+  .modal-images { height: 260px; }
+  .modal-info { padding: 28px 20px 32px; }
+  .modal-name { font-size: 22px; }
+  .modal-price { font-size: 22px; }
+}

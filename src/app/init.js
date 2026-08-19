@@ -1,0 +1,117 @@
+import { setupScrollReveal } from '../shared/scroll-animations.js';
+import { setLang } from '../shared/i18n.js';
+import { toggleMaintenanceOverlay } from '../shared/maintenance.js';
+import { setupRouting, handleRoute } from '../shared/router.js';
+import { initProductGrid } from '../features/catalog/product-grid.js';
+import { bindCartEvents, updateCartBadge } from '../features/cart/cart-drawer.js';
+import { setupCheckoutForm } from '../features/cart/checkout.js';
+import { loadWishlist, updateWishlistUI } from '../features/favorites/favorites-drawer.js';
+import { updateHeroVideoElement } from '../features/hero/hero.js';
+import { initPreloader, hidePreloader } from '../features/hero/preloader.js';
+import { updateBrandImages } from '../features/brand/brand-story.js';
+import { initCountdown } from '../features/drop/countdown.js';
+import { setupNewsletterModal } from '../features/newsletter/newsletter-modal.js';
+import { initAdminPanel, openLoginModal, openAdminPanel, setupMaintenanceButton } from '../features/admin/admin-init.js';
+import { subscribeProducts } from '../services/product-service.js';
+import { subscribeGlobalSettings } from '../services/settings-service.js';
+import { subscribeAuthState } from '../services/auth-service.js';
+import { subscribeDropSettings } from '../services/settings-service.js';
+
+function updateNavLayout() {
+  const isMobile = window.innerWidth <= 900;
+  const mobileActions = document.querySelector('.nav-mobile-actions');
+  const desktopLinks = document.querySelector('.nav-links');
+  
+  if (mobileActions) mobileActions.style.display = isMobile ? 'flex' : 'none';
+  if (desktopLinks) desktopLinks.style.display = isMobile ? 'none' : 'flex';
+  
+  if (!isMobile && window.closeDrawer) {
+    window.closeDrawer();
+  }
+}
+
+export function initApp() {
+  document.addEventListener('DOMContentLoaded', () => {
+    // Make language setter available globally
+    window.setLang = setLang;
+    
+    // Initialize components
+    bindCartEvents();
+    setupCheckoutForm();
+    if (typeof setupNewsletterModal === 'function') setupNewsletterModal();
+    if (typeof initPreloader === 'function') initPreloader();
+    setupScrollReveal();
+    setupRouting();
+    initAdminPanel();
+    loadWishlist();
+
+    let isMaintenanceActive = false;
+    let isAdminLoggedIn = false;
+
+    // Subscriptions
+    subscribeAuthState((user) => {
+      isAdminLoggedIn = !!user;
+      toggleMaintenanceOverlay(isMaintenanceActive, isAdminLoggedIn);
+
+      if (window.location.pathname.startsWith('/admin')) {
+        if (isAdminLoggedIn) {
+          const modal = document.getElementById('login-modal');
+          if (modal) modal.classList.remove('open');
+          openAdminPanel();
+        } else {
+          openLoginModal();
+        }
+      }
+    });
+
+    subscribeGlobalSettings((settings) => {
+      isMaintenanceActive = settings.maintenanceMode || false;
+      setupMaintenanceButton(isMaintenanceActive);
+      toggleMaintenanceOverlay(isMaintenanceActive, isAdminLoggedIn);
+
+      if (settings.heroVideoUrl !== undefined) {
+        updateHeroVideoElement(settings.heroVideoUrl || '');
+      }
+
+      updateBrandImages(settings);
+    });
+
+    subscribeProducts((products) => {
+      if (typeof initProductGrid === 'function') {
+        initProductGrid(products);
+      }
+      updateWishlistUI();
+      if (typeof hidePreloader === 'function') {
+        hidePreloader();
+      }
+    });
+
+    subscribeDropSettings((settings) => {
+      if (typeof initCountdown === 'function') {
+        initCountdown(settings);
+      }
+    });
+
+    // Responsive navbar updater
+    updateNavLayout();
+    window.addEventListener('resize', updateNavLayout);
+
+    // Route initial path on load
+    if (typeof handleRoute === 'function') {
+      handleRoute(window.location.pathname, false);
+    }
+
+    // Trigger welcome newsletter modal after 4 seconds
+    setTimeout(() => {
+      const isSubscribed = localStorage.getItem('babushka_olga_subscribed_newsletter') === 'true';
+      const isDismissed = sessionStorage.getItem('babushka_olga_dismissed_newsletter') === 'true';
+      const newsletterOverlay = document.getElementById('newsletter-modal-overlay');
+      
+      if (!isSubscribed && !isDismissed && newsletterOverlay) {
+        if (typeof window.openNewsletterModal === 'function') {
+          window.openNewsletterModal();
+        }
+      }
+    }, 4000);
+  });
+}

@@ -1,0 +1,46 @@
+/* ── ARTICLE / CARE GUIDE ── */
+.article { background: var(--dark); color: var(--white); }
+.article-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 80px; }
+.article-sidebar { position: sticky; top: 120px; align-self: start; }
+.article-sidebar .section-title { color: var(--white); margin-bottom: 24px; }
+.article-sidebar p { font-size: 14px; font-weight: 300; color: rgba(253,250,246,0.6); line-height: 1.8; }
+.article-sidebar p + p { margin-top: 16px; }
+.article-toc { margin-top: 40px; border-top: 1px solid rgba(200,184,154,0.3); padding-top: 32px; }
+.article-toc-title { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--beige-accent); margin-bottom: 16px; }
+.article-toc a { display: block; font-size: 13px; font-weight: 300; color: rgba(253,250,246,0.5); text-decoration: none; padding: 6px 0; transition: color var(--transition); }
+.article-toc a:hover { color: var(--white); }
+.article-content h3 { font-family: var(--font-display); font-size: 28px; font-weight: 400; color: var(--white); margin: 48px 0 16px; letter-spacing: -0.01em; }
+.article-content h3:first-child { margin-top: 0; }
+.article-content p { font-size: 15px; font-weight: 300; color: rgba(253,250,246,0.7); line-height: 1.85; margin-bottom: 16px; }
+.article-content strong { color: rgba(253,250,246,0.95); font-weight: 500; }
+.article-tip {
+  border-left: 2px solid var(--beige-accent); padding: 20px 24px; margin: 32px 0;
+  background: rgba(200,184,154,0.08);
+}
+.article-tip p { color: rgba(253,250,246,0.85); font-style: italic; margin: 0; }
+.article-steps { list-style: none; }
+.article-steps li {
+  display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid rgba(200,184,154,0.12);
+}
+.article-step-num {
+  font-family: var(--font-display); font-size: 36px; font-weight: 300; color: var(--beige-accent);
+  line-height: 1; flex-shrink: 0; width: 48px;
+}
+.article-step-content strong { display: block; font-size: 14px; font-weight: 500; color: rgba(253,250,246,0.9); margin-bottom: 6px; }
+.article-step-content span { font-size: 13px; font-weight: 300; color: rgba(253,250,246,0.55); line-height: 1.7; }
+
+@media (max-width: 1024px) {
+  .article-grid { gap: 48px; }
+}
+
+@media (max-width: 900px) {
+  .article-grid { grid-template-columns: 1fr; }
+  .article-sidebar { position: static; }
+}
+
+@media (max-width: 600px) {
+  .article { padding: 60px 20px; }
+  .article-grid { grid-template-columns: 1fr; gap: 40px; }
+  .article-toc { display: none; }
+  .article-content h3 { font-size: 22px; }
+}

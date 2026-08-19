@@ -1,0 +1,21 @@
+/* ── THANK YOU ── */
+.thankyou {
+  background: var(--white); text-align: center;
+  padding: 120px 48px;
+}
+.thankyou-icon { font-size: 48px; margin-bottom: 24px; }
+.thankyou .section-title { max-width: 600px; margin: 0 auto 20px; }
+.thankyou p { font-size: 16px; font-weight: 300; color: var(--brown); max-width: 520px; margin: 0 auto 40px; line-height: 1.8; }
+.thankyou-divider {
+  width: 60px; height: 1px; background: var(--beige-accent);
+  margin: 40px auto;
+}
+.thankyou-signature { font-family: var(--font-display); font-size: 32px; font-weight: 300; font-style: italic; color: var(--brown); }
+
+@media (max-width: 900px) {
+  .thankyou { padding: 80px 32px; }
+}
+
+@media (max-width: 600px) {
+  .thankyou { padding: 60px 20px; }
+}

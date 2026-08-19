@@ -1,0 +1,13 @@
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 32px; right: 32px; z-index: 500;
+  background: var(--dark); color: var(--white); padding: 16px 24px;
+  font-size: 13px; font-weight: 300; letter-spacing: 0.06em;
+  opacity: 0; transform: translateY(16px); transition: all 0.35s;
+  pointer-events: none; max-width: 300px;
+}
+.toast.show { opacity: 1; transform: none; }
+
+@media (max-width: 600px) {
+  .toast { left: 20px; right: 20px; bottom: 20px; max-width: none; }
+}

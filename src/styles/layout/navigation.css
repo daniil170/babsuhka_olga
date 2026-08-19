@@ -1,0 +1,152 @@
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 48px;
+  background: rgba(245,240,232,0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(200,184,154,0.3);
+  transition: padding var(--transition);
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 400; letter-spacing: 0.08em;
+  color: var(--dark); text-decoration: none;
+  line-height: 1.1;
+}
+.nav-logo span { display: block; font-size: 11px; font-family: var(--font-body); font-weight: 300; letter-spacing: 0.2em; color: var(--brown); text-transform: uppercase; }
+.nav-links { display: flex; gap: 36px; align-items: center; }
+.nav-links a { font-size: 13px; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dark); text-decoration: none; transition: color var(--transition); }
+.nav-links a:hover { color: var(--brown); }
+
+.nav-actions { display: flex; gap: 16px; align-items: center; }
+
+.lang-toggle {
+  display: flex; gap: 4px; align-items: center;
+  border: 1px solid var(--beige-accent); border-radius: 20px; padding: 3px;
+}
+.lang-btn { background: none; border: none; cursor: pointer; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 500; letter-spacing: 0.1em; transition: all var(--transition); color: var(--brown); }
+.lang-btn.active { background: var(--dark); color: var(--white); }
+
+.burger {
+  display: none;
+}
+
+/* ── ADDITIONAL NAV BTN STYLES ── */
+.nav-text-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dark);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color var(--transition);
+}
+.nav-text-btn:hover {
+  color: var(--brown);
+}
+
+/* ── NAV MOBILE ACTIONS DESKTOP FALLBACK ── */
+.nav-mobile-actions {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  nav { padding: 18px 32px; }
+}
+
+@media (max-width: 900px) {
+  nav {
+    display: grid;
+    grid-template-columns: 80px 1fr 80px;
+    align-items: center;
+    padding: 12px 24px;
+    height: 60px;
+    background: rgba(245,240,232,0.95);
+  }
+  .nav-links { display: none; }
+  .nav-mobile-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .nav-logo {
+    grid-column: 2;
+    margin: 0 auto;
+    font-size: 20px;
+    text-align: center;
+  }
+  .nav-logo span {
+    font-size: 9px;
+  }
+  .burger {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    grid-column: 1;
+    justify-content: center;
+    align-items: flex-start;
+    z-index: 101;
+    width: max-content;
+  }
+  .burger span {
+    display: block;
+    width: 20px;
+    height: 1.5px;
+    background: var(--dark);
+    transition: all var(--transition);
+  }
+  .burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .burger.open span:nth-child(2) { opacity: 0; }
+  .burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+  .mobile-drawer {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99;
+    background: var(--beige);
+    padding: 40px 24px;
+    transform: translateX(-100%);
+    transition: transform var(--transition);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mobile-drawer.open {
+    transform: none;
+  }
+  .mobile-drawer a {
+    font-size: 24px;
+    font-family: var(--font-display);
+    font-weight: 300;
+    color: var(--dark);
+    text-decoration: none;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--beige-mid);
+    display: block;
+  }
+}
+
+@media (max-width: 600px) {
+  nav {
+    padding: 10px 16px;
+    grid-template-columns: 60px 1fr 60px;
+  }
+  .nav-logo { font-size: 18px; }
+  .nav-logo span { font-size: 8px; letter-spacing: 0.12em; }
+  .nav-mobile-actions { gap: 0; }
+}

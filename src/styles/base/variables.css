@@ -1,0 +1,14 @@
+/* ── DESIGN SYSTEM & VARIABLE TOKENS ── */
+:root {
+  --beige: #F5F0E8;
+  --beige-mid: #E8E0D0;
+  --beige-accent: #C8B89A;
+  --brown: #6B5E4E;
+  --dark: #1A1A1A;
+  --white: #FDFAF6;
+  --sold: #9E9E9E;
+  --low: #C9A84C;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Inter', sans-serif;
+  --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
