@@ -305,6 +305,7 @@ function updateAdminUIForAuth() {
 
 export function openLoginModal() {
   hidePreloader(true);
+  document.querySelector('.bottom-widgets')?.classList.add('hidden');
   if (elements.loginOverlay) elements.loginOverlay.classList.add('open');
 }
 
@@ -316,6 +317,9 @@ export function closeLoginModal() {
   if (!currentAdminUser && window.location.pathname.startsWith('/admin')) {
     history.pushState(null, '', '/');
   }
+  if (!elements.adminPanel?.classList.contains('open')) {
+    document.querySelector('.bottom-widgets')?.classList.remove('hidden');
+  }
 }
 
 export function openAdminPanel() {
@@ -324,6 +328,8 @@ export function openAdminPanel() {
     openLoginModal();
     return;
   }
+  document.body.classList.add('admin-mode');
+  document.querySelector('.bottom-widgets')?.classList.add('hidden');
   if (elements.adminPanel) elements.adminPanel.classList.add('open');
   document.body.style.overflow = 'hidden';
   
@@ -365,6 +371,8 @@ export function openAdminPanel() {
 }
 
 export function closeAdminPanel() {
+  document.body.classList.remove('admin-mode');
+  document.querySelector('.bottom-widgets')?.classList.remove('hidden');
   if (elements.adminPanel) elements.adminPanel.classList.remove('open');
   document.body.style.overflow = '';
   

@@ -1,9 +1,17 @@
 /* ── ADMIN PANEL ── */
 #admin-panel {
-  display: none; position: fixed; inset: 0; z-index: 300;
+  display: none; position: fixed; inset: 0; z-index: 999;
   background: #f0ebe3; overflow-y: auto;
 }
 #admin-panel.open { display: block; }
+#admin-panel.open ~ .bottom-widgets,
+body.admin-mode .bottom-widgets,
+body:has(#admin-panel.open) .bottom-widgets {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
 .admin-nav {
   background: var(--dark); color: var(--white);
   display: flex; align-items: center; justify-content: space-between;
