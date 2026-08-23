@@ -11,6 +11,7 @@ import { initPreloader, hidePreloader } from '../features/hero/preloader.js';
 import { updateBrandImages } from '../features/brand/brand-story.js';
 import { initCountdown } from '../features/drop/countdown.js';
 import { setupNewsletterModal } from '../features/newsletter/newsletter-modal.js';
+import { setupPrivacyAndUnsubscribe } from '../features/newsletter/privacy-unsubscribe.js';
 import { initAdminPanel, openLoginModal, openAdminPanel, setupMaintenanceButton } from '../features/admin/admin-init.js';
 import { subscribeProducts } from '../services/product-service.js';
 import { subscribeGlobalSettings } from '../services/settings-service.js';
@@ -39,6 +40,7 @@ export function initApp() {
     bindCartEvents();
     setupCheckoutForm();
     if (typeof setupNewsletterModal === 'function') setupNewsletterModal();
+    if (typeof setupPrivacyAndUnsubscribe === 'function') setupPrivacyAndUnsubscribe();
     if (typeof initPreloader === 'function') initPreloader();
     setupScrollReveal();
     setupRouting();
@@ -101,13 +103,14 @@ export function initApp() {
       handleRoute(window.location.pathname, false);
     }
 
-    // Trigger welcome newsletter modal after 4 seconds
+    // Trigger welcome newsletter modal after 4 seconds (only on customer pages, not on /admin)
     setTimeout(() => {
       const isSubscribed = localStorage.getItem('babushka_olga_subscribed_newsletter') === 'true';
       const isDismissed = sessionStorage.getItem('babushka_olga_dismissed_newsletter') === 'true';
       const newsletterOverlay = document.getElementById('newsletter-modal-overlay');
+      const isAdminRoute = window.location.pathname.startsWith('/admin') || document.getElementById('admin-panel')?.classList.contains('open');
       
-      if (!isSubscribed && !isDismissed && newsletterOverlay) {
+      if (!isSubscribed && !isDismissed && newsletterOverlay && !isAdminRoute) {
         if (typeof window.openNewsletterModal === 'function') {
           window.openNewsletterModal();
         }

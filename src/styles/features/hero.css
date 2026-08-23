@@ -15,6 +15,7 @@
   position: absolute; inset: 0; z-index: 0;
   background: linear-gradient(135deg, #d4c5b0 0%, #bfaf99 40%, #a89880 100%);
   display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
 }
 .hero-fallback-text {
   font-family: var(--font-display); font-size: 120px; font-weight: 300;

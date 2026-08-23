@@ -1,5 +1,5 @@
 import { db } from '../config/firebase.js';
-import { collection, addDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, orderBy, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
 
 const MOCK_SUBSCRIBERS_KEY = 'babushka_olga_mock_subscribers';
 const subscribersListeners = [];
@@ -25,6 +25,41 @@ export async function addSubscriber(email) {
       localStorage.setItem(MOCK_SUBSCRIBERS_KEY, JSON.stringify(subscribers));
       subscribersListeners.forEach(listener => listener(subscribers));
     }
+  }
+}
+
+export async function removeSubscriber(email) {
+  if (!email) return;
+  const normalized = email.trim().toLowerCase();
+  
+  localStorage.setItem('babushka_olga_subscribed_newsletter', 'false');
+
+  if (db) {
+    try {
+      const q = query(collection(db, 'subscribers'), where('email', '==', normalized));
+      const snapshot = await getDocs(q);
+      const deletePromises = [];
+      snapshot.forEach((docSnap) => {
+        deletePromises.push(deleteDoc(doc(db, 'subscribers', docSnap.id)));
+      });
+      await Promise.all(deletePromises);
+    } catch (err) {
+      console.warn('Firestore remove subscriber notice, attempting API fallback:', err);
+      try {
+        await fetch('/api/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: normalized })
+        });
+      } catch (apiErr) {
+        console.error('API unsubscribe fallback error:', apiErr);
+      }
+    }
+  } else {
+    let subscribers = JSON.parse(localStorage.getItem(MOCK_SUBSCRIBERS_KEY)) || [];
+    subscribers = subscribers.filter(s => s.email !== normalized);
+    localStorage.setItem(MOCK_SUBSCRIBERS_KEY, JSON.stringify(subscribers));
+    subscribersListeners.forEach(listener => listener(subscribers));
   }
 }
 

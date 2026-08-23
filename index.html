@@ -199,6 +199,106 @@
   </div>
 </div>
 
+<!-- PRIVACY POLICY MODAL OVERLAY -->
+<div class="form-modal-overlay" id="privacy-modal-overlay">
+  <div class="form-modal" style="max-width: 720px; width: 95%; max-height: 85vh; display: flex; flex-direction: column; padding: 36px 32px; text-align: left;">
+    <button class="form-modal-close" onclick="closePrivacyModal()">✕</button>
+    <div style="font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--beige-accent); margin-bottom: 8px;" data-ru="Юридическая информация" data-en="Legal Information">Юридическая информация</div>
+    <div class="form-modal-title" style="font-size: 26px; margin-bottom: 20px; text-align: left;" data-ru="Политика конфиденциальности" data-en="Privacy Policy">Политика конфиденциальности</div>
+    
+    <div class="privacy-modal-content" style="flex: 1; overflow-y: auto; padding-right: 12px; font-size: 13px; line-height: 1.7; color: var(--brown);">
+      
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-family: var(--font-display); font-size: 18px; color: var(--dark); margin: 0 0 8px 0;" data-ru="1. Общие положения" data-en="1. General Provisions">1. Общие положения</h4>
+        <p data-ru="Семейный бренд ручных свитеров «Babushka Olga» (г. Алматы, Республика Казахстан) с глубоким уважением относится к персональным данным клиентов. Настоящая Политика конфиденциальности описывает, как мы собираем, используем, храним и защищаем ваши персональные данные при посещении сайта и оформлении заказов." data-en="The family handcrafted knitwear brand 'Babushka Olga' (Almaty, Republic of Kazakhstan) deeply values and respects the privacy of our customers. This Privacy Policy describes how we collect, use, store, and protect your personal data when visiting our website and placing orders.">
+          Семейный бренд ручных свитеров «Babushka Olga» (г. Алматы, Республика Казахстан) с глубоким уважением относится к персональным данным клиентов. Настоящая Политика конфиденциальности описывает, как мы собираем, используем, храним и защищаем ваши персональные данные при посещении сайта и оформлении заказов.
+        </p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-family: var(--font-display); font-size: 18px; color: var(--dark); margin: 0 0 8px 0;" data-ru="2. Какие данные мы собираем" data-en="2. Data We Collect">2. Какие данные мы собираем</h4>
+        <ul style="padding-left: 20px; margin: 0 0 10px 0;">
+          <li style="margin-bottom: 6px;" data-ru="<strong>При оформлении заказа:</strong> Ваше имя и контактный номер телефона для подтверждения заказа через WhatsApp или звонок." data-en="<strong>When placing an order:</strong> Your name and contact phone number to confirm details via WhatsApp or phone call."><strong>При оформлении заказа:</strong> Ваше имя и контактный номер телефона для подтверждения заказа через WhatsApp или звонок.</li>
+          <li style="margin-bottom: 6px;" data-ru="<strong>При подписке на новости:</strong> Адрес электронной почты (Email) исключительно с вашего прямого согласия для отправки промокода и анонсов новых коллекций." data-en="<strong>When subscribing to news:</strong> Your email address, collected solely with your explicit consent to receive welcome discounts and new drop announcements."><strong>При подписке на новости:</strong> Адрес электронной почты (Email) исключительно с вашего прямого согласия для отправки промокода и анонсов новых коллекций.</li>
+          <li style="margin-bottom: 6px;" data-ru="<strong>Технические файлы (LocalStorage):</strong> Сохранение списка выбранных товаров в корзине, избранного и выбранного языка интерфейса (RU/EN) на вашем устройстве." data-en="<strong>Technical Data (LocalStorage):</strong> Preserving your shopping cart items, wishlist, and preferred language (RU/EN) on your device."><strong>Технические файлы (LocalStorage):</strong> Сохранение списка выбранных товаров в корзине, избранного и выбранного языка интерфейса (RU/EN) на вашем устройстве.</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-family: var(--font-display); font-size: 18px; color: var(--dark); margin: 0 0 8px 0;" data-ru="3. Цели обработки данных" data-en="3. Purpose of Processing">3. Цели обработки данных</h4>
+        <p data-ru="Мы используем предоставленные данные строго для: (а) подтверждения и организации доставки выбранных вязаных изделий; (б) консультации по размерам и индивидуальным заказам; (в) отправки полезных материалов по уходу за шерстью, специальных предложений и информации о новых дропах (только для подписчиков)." data-en="We use your provided data strictly to: (a) confirm and arrange delivery of selected knitwear; (b) advise on sizing and bespoke requests; (c) deliver wool care tips, special offers, and new drop announcements (subscribers only).">
+          Мы используем предоставленные данные строго для: (а) подтверждения и организации доставки выбранных вязаных изделий; (б) консультации по размерам и индивидуальным заказам; (в) отправки полезных материалов по уходу за шерстью, специальных предложений и информации о новых дропах (только для подписчиков).
+        </p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-family: var(--font-display); font-size: 18px; color: var(--dark); margin: 0 0 8px 0;" data-ru="4. Безопасность и третьи лица" data-en="4. Security & Third Parties">4. Безопасность и третьи лица</h4>
+        <p data-ru="Мы никогда не продаем, не обмениваем и не передаем персональные данные третьим лицам в рекламных целях. Данные хранятся в защищенной облачной базе данных Google Firebase. Для отправки email-сообщений используется защищенный шлюз Resend API с шифрованием трафика." data-en="We never sell, rent, or transfer personal information to third parties for commercial advertising. Data is safely stored in Google Firebase cloud. Email newsletters are sent via secure Resend API gateway with modern encryption standards.">
+          Мы никогда не продаем, не обмениваем и не передаем персональные данные третьим лицам в рекламных целях. Данные хранятся в защищенной облачной базе данных Google Firebase. Для отправки email-сообщений используется защищенный шлюз Resend API с шифрованием трафика.
+        </p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-family: var(--font-display); font-size: 18px; color: var(--dark); margin: 0 0 8px 0;" data-ru="5. Отзыв согласия и отписка от рассылки" data-en="5. Unsubscribe & Data Removal">5. Отзыв согласия и отписка от рассылки</h4>
+        <p data-ru="Вы можете в любой момент в один клик отписаться от рассылки по ссылке внизу каждого письма или на странице <a href='/unsubscribe' style='text-decoration: underline; color: var(--dark);'>Отписка от рассылки</a>. Также вы можете потребовать полного удаления своих данных, отправив запрос на info@babushka-olga.com." data-en="You may unsubscribe at any time with a single click via the link at the bottom of any email or on the <a href='/unsubscribe' style='text-decoration: underline; color: var(--dark);'>Unsubscribe Page</a>. You may also request complete removal of your data by contacting info@babushka-olga.com.">
+          Вы можете в любой момент в один клик отписаться от рассылки по ссылке внизу каждого письма или на странице <a href='/unsubscribe' style='text-decoration: underline; color: var(--dark);'>Отписка от рассылки</a>. Также вы можете потребовать полного удаления своих данных, отправив запрос на info@babushka-olga.com.
+        </p>
+      </div>
+
+      <div>
+        <h4 style="font-family: var(--font-display); font-size: 18px; color: var(--dark); margin: 0 0 8px 0;" data-ru="6. Контакты" data-en="6. Contact Information">6. Контакты</h4>
+        <p style="margin: 0;" data-ru="Бренд «Babushka Olga»<br>г. Алматы, Республика Казахстан<br>WhatsApp: +7 (707) 720-04-40<br>Email: info@babushka-olga.com" data-en="Brand 'Babushka Olga'<br>Almaty, Republic of Kazakhstan<br>WhatsApp: +7 (707) 720-04-40<br>Email: info@babushka-olga.com">
+          Бренд «Babushka Olga»<br>
+          г. Алматы, Республика Казахстан<br>
+          WhatsApp: +7 (707) 720-04-40<br>
+          Email: info@babushka-olga.com
+        </p>
+      </div>
+
+    </div>
+
+    <div style="margin-top: 24px; text-align: right;">
+      <button class="modal-btn" onclick="closePrivacyModal()" style="width: auto; padding: 12px 32px;" data-ru="Закрыть" data-en="Close">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- UNSUBSCRIBE MODAL OVERLAY -->
+<div class="form-modal-overlay" id="unsubscribe-modal-overlay">
+  <div class="form-modal" style="max-width: 460px; padding: 36px 28px; text-align: center;">
+    <button class="form-modal-close" onclick="closeUnsubscribeModal()">✕</button>
+    
+    <div style="font-size: 28px; margin-bottom: 12px;">💌</div>
+    
+    <div id="unsubscribe-form-box">
+      <div class="form-modal-title" style="font-size: 24px; margin-bottom: 12px;" data-ru="Отписка от рассылки" data-en="Unsubscribe from Newsletter">Отписка от рассылки</div>
+      <p style="font-size: 13px; color: var(--brown); margin-bottom: 24px; line-height: 1.6;" data-ru="Нам очень жаль с вами расставаться. Введите ваш email адрес, чтобы перестать получать рассылку о новых дропах и подарках:" data-en="We are sad to see you go. Enter your email address to stop receiving updates about new drops and special gifts:">
+        Нам очень жаль с вами расставаться. Введите ваш email адрес, чтобы перестать получать рассылку о новых дропах и подарках:
+      </p>
+
+      <form id="unsubscribe-form">
+        <div class="form-group" style="margin-bottom: 20px;">
+          <input type="email" id="unsubscribe-email" required placeholder="email@example.com" style="width: 100%; text-align: center;">
+        </div>
+        <button class="modal-btn" type="submit" id="unsubscribe-submit-btn" style="width: 100%; background: #c0392b; color: #fff;" data-ru="Отписаться от рассылки" data-en="Unsubscribe">Отписаться от рассылки</button>
+      </form>
+      
+      <div style="margin-top: 16px;">
+        <a href="/" onclick="closeUnsubscribeModal(); return false;" style="font-size: 12px; color: var(--brown); text-decoration: underline;" data-ru="← Вернуться в магазин" data-en="← Back to Shop">← Вернуться в магазин</a>
+      </div>
+    </div>
+
+    <div id="unsubscribe-success-box" style="display: none;">
+      <div class="form-modal-title" style="font-size: 22px; margin-bottom: 12px; color: #27ae60;" data-ru="Вы успешно отписаны" data-en="Successfully Unsubscribed">Вы успешно отписаны</div>
+      <p style="font-size: 13px; color: var(--brown); margin-bottom: 24px; line-height: 1.6;" data-ru="Адрес <strong id='unsubscribe-success-email'></strong> удален из нашей базы рассылки. Вы больше не будете получать рекламные письма." data-en="Address <strong id='unsubscribe-success-email'></strong> has been removed from our newsletter list. You will no longer receive promotional emails.">
+        Адрес <strong id="unsubscribe-success-email"></strong> удален из нашей базы рассылки. Вы больше не будете получать рекламные письма.
+      </p>
+      <button class="modal-btn" onclick="closeUnsubscribeModal(); document.getElementById('products')?.scrollIntoView({behavior: 'smooth'});" style="width: 100%;" data-ru="Перейти в каталог" data-en="View Catalog">Перейти в каталог</button>
+    </div>
+
+  </div>
+</div>
+
 <!-- MAINTENANCE COVER OVERLAY -->
 <div class="maintenance-overlay" id="maintenance-overlay">
   <div class="maintenance-icon">🧶</div>
@@ -432,11 +532,12 @@
       <a href="#products" data-ru="Коллекция" data-en="Collection">Коллекция</a>
       <a href="#article" data-ru="Уход" data-en="Care Guide">Уход</a>
       <a href="#archive" data-ru="Архив" data-en="Archive">Архив</a>
+      <a href="/privacy" data-ru="Конфиденциальность" data-en="Privacy Policy">Конфиденциальность</a>
     </div>
     <div class="footer-col">
       <h4 data-ru="Контакты" data-en="Contacts">Контакты</h4>
       <a href="https://wa.me/77077200440" target="_blank">WhatsApp</a>
-      <a href="mailto:info@babushkaolga.kz">info@babushkaolga.kz</a>
+      <a href="mailto:info@babushka-olga.com">info@babushka-olga.com</a>
       <a href="https://www.instagram.com/babushkaolgaa/?utm_source=ig_web_button_share_sheet" target="_blank">Instagram</a>
     </div>
     <div class="footer-col">
@@ -446,6 +547,10 @@
   </div>
   <div class="footer-bottom">
     <p>&copy; 2026 Бабушка Ольга. All rights reserved.</p>
+    <div style="display:flex; gap:16px; font-size:11px; margin: 4px 0;">
+      <a href="/privacy" style="color:rgba(253,250,246,0.6); text-decoration:underline;" data-ru="Политика конфиденциальности" data-en="Privacy Policy">Политика конфиденциальности</a>
+      <a href="/unsubscribe" style="color:rgba(253,250,246,0.6); text-decoration:underline;" data-ru="Отписка от рассылки" data-en="Unsubscribe">Отписка от рассылки</a>
+    </div>
     <p style="font-size:11px" data-ru="Made in Almaty with love" data-en="Made in Almaty with love">Made in Almaty with love</p>
   </div>
 </footer>
@@ -504,6 +609,7 @@
       <button class="admin-tab" onclick="switchAdminTab('add')">Добавить товар</button>
       <button class="admin-tab" onclick="switchAdminTab('archive')">Архив продаж</button>
       <button class="admin-tab" onclick="switchAdminTab('orders')">Заказы</button>
+      <button class="admin-tab" onclick="switchAdminTab('newsletters')">Рассылки</button>
       <button class="admin-tab" onclick="switchAdminTab('settings')">Настройки дропа</button>
     </div>
 
@@ -660,6 +766,159 @@
       </div>
     </div>
 
+    <!-- NEWSLETTERS TAB -->
+    <div class="admin-section" id="admin-newsletters">
+      <div class="admin-products-header">
+        <div>
+          <h2>Email Рассылки</h2>
+          <span style="font-size:12px; color:var(--brown);">Отправка писем через Resend API от <strong>info@babushka-olga.com</strong></span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span class="recipients-pill" id="newsletter-recipients-count">0 подписчиков</span>
+          <button class="btn-add" onclick="resetNewsletterForm()">+ Новая рассылка</button>
+        </div>
+      </div>
+
+      <div class="newsletter-editor-layout">
+        <!-- LEFT: FORM & WYSIWYG -->
+        <div class="newsletter-form-container">
+          <h3 id="newsletter-form-heading" style="font-family:var(--font-display); font-size:22px; margin-bottom:20px; font-weight:400;">
+            Создать новую рассылку
+          </h3>
+
+          <div class="form-group">
+            <label>Быстрый шаблон</label>
+            <select class="wysiwyg-select" id="newsletter-template-select" style="padding:10px 14px; background:var(--beige); border-color:var(--beige-mid); font-size:13px;">
+              <option value="">-- Выберите готовый шаблон (по желанию) --</option>
+              <option value="welcome">🎁 Приветственная скидка 5000 ₸</option>
+              <option value="newDrop">🍂 Анонс нового дропа свитеров</option>
+              <option value="care">✨ Гид по уходу за шерстью</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Название кампании (для админки)</label>
+            <input type="text" id="newsletter-title" placeholder="Например: Скидка 5000 ₸ на весеннюю коллекцию">
+          </div>
+
+          <div class="form-group">
+            <label>Тема письма (Subject для получателей)</label>
+            <input type="text" id="newsletter-subject" placeholder="Например: Ваш подарок от Бабушки Ольги 🧶">
+          </div>
+
+          <div class="form-group">
+            <label>Содержимое письма (WYSIWYG редактор)</label>
+            <div class="wysiwyg-container">
+              <div class="wysiwyg-toolbar">
+                <button type="button" class="wysiwyg-btn" data-command="bold" title="Жирный (Bold)"><strong>B</strong></button>
+                <button type="button" class="wysiwyg-btn" data-command="italic" title="Курсив (Italic)"><em>I</em></button>
+                <button type="button" class="wysiwyg-btn" data-command="underline" title="Подчеркнутый (Underline)"><u>U</u></button>
+                <button type="button" class="wysiwyg-btn" data-command="strikeThrough" title="Зачеркнутый"><s>S</s></button>
+                
+                <div class="wysiwyg-divider"></div>
+                
+                <button type="button" class="wysiwyg-btn" data-command="formatBlock" data-value="h2" title="Заголовок H2">H2</button>
+                <button type="button" class="wysiwyg-btn" data-command="formatBlock" data-value="h3" title="Заголовок H3">H3</button>
+                <button type="button" class="wysiwyg-btn" data-command="formatBlock" data-value="p" title="Параграф">P</button>
+                
+                <div class="wysiwyg-divider"></div>
+                
+                <button type="button" class="wysiwyg-btn" data-command="insertUnorderedList" title="Маркированный список">• Список</button>
+                <button type="button" class="wysiwyg-btn" data-command="insertOrderedList" title="Нумерованный список">1. Список</button>
+                <button type="button" class="wysiwyg-btn" data-command="formatBlock" data-value="blockquote" title="Цитата">” Цитата</button>
+                
+                <div class="wysiwyg-divider"></div>
+                
+                <button type="button" class="wysiwyg-btn" data-command="createLink" title="Вставить ссылку">🔗 Ссылка</button>
+                <button type="button" class="wysiwyg-btn" data-command="insertButton" title="Вставить кнопку действия">🔘 Кнопка</button>
+                <button type="button" class="wysiwyg-btn" data-command="insertImage" title="Вставить картинку">🖼️ Фото</button>
+                
+                <div class="wysiwyg-divider"></div>
+                
+                <button type="button" class="wysiwyg-btn" id="wysiwyg-toggle-source" title="Переключить HTML-код" style="margin-left:auto; font-family:monospace; font-size:11px;">&lt;/&gt; HTML код</button>
+              </div>
+
+              <!-- Visual Editor -->
+              <div class="wysiwyg-editor" id="newsletter-wysiwyg-editor" contenteditable="true" spellcheck="false" placeholder="Напишите текст рассылки..."></div>
+              
+              <!-- Raw HTML Code Editor (Hidden initially) -->
+              <textarea class="wysiwyg-source" id="newsletter-content-source" style="display:none;" placeholder="<p>HTML код рассылки...</p>"></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions" style="margin-top:24px; flex-wrap:wrap;">
+            <button type="button" class="btn-save" id="btn-send-newsletter" style="background:#27ae60;">
+              📨 Отправить всем подписчикам
+            </button>
+            <button type="button" class="btn-save" id="btn-save-newsletter-draft" style="background:var(--dark);">
+              💾 Сохранить черновик
+            </button>
+            <button type="button" class="btn-cancel" id="btn-clear-newsletter">
+              ✕ Очистить
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT: LIVE PREVIEW -->
+        <div class="newsletter-live-preview-container">
+          <h3 style="font-family:var(--font-display); font-size:20px; margin-bottom:16px; font-weight:400;">
+            Предпросмотр письма
+          </h3>
+
+          <div class="newsletter-preview-meta">
+            <div class="newsletter-preview-meta-row">
+              <span class="newsletter-preview-meta-label">От:</span>
+              <span><strong>Babushka Olga</strong> &lt;info@babushka-olga.com&gt;</span>
+            </div>
+            <div class="newsletter-preview-meta-row">
+              <span class="newsletter-preview-meta-label">Кому:</span>
+              <span>База подписчиков сайта</span>
+            </div>
+            <div class="newsletter-preview-meta-row">
+              <span class="newsletter-preview-meta-label">Тема:</span>
+              <span id="newsletter-live-preview-subject" style="font-weight:500; color:var(--dark);">Тема письма появится здесь</span>
+            </div>
+          </div>
+
+          <div class="newsletter-mockup-frame">
+            <div class="mockup-header">
+              <div class="mockup-logo">Babushka Olga</div>
+              <div class="mockup-sub">Ручные свитера · Алматы</div>
+            </div>
+            <div class="mockup-body" id="newsletter-live-preview-body">
+              <p style="color:#999; font-style:italic;">Начните вводить текст рассылки...</p>
+            </div>
+            <div class="mockup-footer">
+              <p style="margin:0 0 4px 0;"><strong>Babushka Olga</strong> — создано в Алматы с любовью 🤍</p>
+              <p style="margin:0; font-size:10px; color:#888;">Вы получили это письмо, так как подписались на рассылку · <span style="text-decoration:underline;">Отписаться</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY TABLE -->
+      <div class="admin-products-header" style="margin-top:40px;">
+        <h2>История рассылок</h2>
+      </div>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Кампания</th>
+              <th>Тема письма</th>
+              <th>Получатели</th>
+              <th>Статус</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody id="admin-newsletters-tbody">
+            <!-- Dynamic newsletters list -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- SETTINGS TAB -->
     <div class="admin-section" id="admin-settings">
       <div class="admin-products-header">
@@ -743,8 +1002,16 @@
   </div>
 </div>
 
-<!-- ADMIN TRIGGER BUTTON -->
-<button class="admin-trigger" title="Панель администратора" style="display: none !important;">⚙</button>
+<!-- FULL EMAIL PREVIEW MODAL -->
+<div class="form-modal-overlay" id="newsletter-preview-modal">
+  <div class="form-modal" style="max-width: 680px; width: 95%; padding: 24px; max-height: 90vh; display: flex; flex-direction: column;">
+    <button class="form-modal-close" onclick="closeNewsletterPreviewModal()">✕</button>
+    <div class="form-modal-title" id="newsletter-preview-modal-title" style="font-size: 20px; margin-bottom: 16px;">Предпросмотр рассылки</div>
+    <div style="flex: 1; border: 1px solid var(--beige-mid); border-radius: 4px; overflow: hidden; background: #fff; min-height: 480px;">
+      <iframe id="newsletter-preview-frame" style="width: 100%; height: 100%; min-height: 480px; border: none;"></iframe>
+    </div>
+  </div>
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>

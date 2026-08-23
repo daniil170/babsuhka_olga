@@ -1,4 +1,15 @@
 export function initPreloader() {
+  const preloader = document.getElementById('preloader');
+  
+  // Disable and hide preloader immediately on admin routes
+  if (window.location.pathname.startsWith('/admin')) {
+    if (preloader) {
+      preloader.style.display = 'none';
+      preloader.classList.add('fade-out');
+    }
+    return;
+  }
+
   const canvas = document.getElementById('yarn-loader');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -131,10 +142,18 @@ export function initPreloader() {
   requestAnimationFrame(draw);
 }
 
-export function hidePreloader() {
+export function hidePreloader(force = false) {
+  const preloader = document.getElementById('preloader');
+  if (force || window.location.pathname.startsWith('/admin')) {
+    if (preloader) {
+      preloader.style.display = 'none';
+      preloader.classList.add('fade-out');
+    }
+    return;
+  }
+
   window.canHidePreloader = true;
   if (window.preloaderAnimationFinished) {
-    const preloader = document.getElementById('preloader');
     if (preloader && !preloader.classList.contains('fade-out')) {
       setTimeout(() => {
         preloader.classList.add('fade-out');

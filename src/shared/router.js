@@ -1,4 +1,5 @@
 import { openAdminPanel, openLoginModal } from '../features/admin/admin-init.js';
+import { openPrivacyModal, openUnsubscribeModal } from '../features/newsletter/privacy-unsubscribe.js';
 
 export function setupRouting(isAdminLoggedIn, onFilterChange) {
   document.addEventListener('click', (e) => {
@@ -40,6 +41,10 @@ export function handleRoute(path, smooth = true, isAdminLoggedIn, onFilterChange
   } else if (path.startsWith('/brand')) {
     const target = document.getElementById('brand');
     if (target) target.scrollIntoView({ behavior: scrollBehavior });
+  } else if (path.startsWith('/privacy')) {
+    openPrivacyModal();
+  } else if (path.startsWith('/unsubscribe')) {
+    openUnsubscribeModal();
   } else if (path.startsWith('/admin')) {
     if (isAdminLoggedIn) {
       openAdminPanel();

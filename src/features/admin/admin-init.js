@@ -3,18 +3,23 @@ import { subscribeProducts } from '../../services/product-service.js';
 import { subscribeOrders } from '../../services/order-service.js';
 import { subscribeDropSettings, subscribeGlobalSettings, updateGlobalSettings } from '../../services/settings-service.js';
 import { subscribeSubscribers } from '../../services/subscriber-service.js';
+import { subscribeNewsletters } from '../../services/newsletter-service.js';
 import { uploadMedia } from '../../services/cloudinary-service.js';
 import { renderAdminProducts, setupFileUploads, getAdminProducts } from './admin-products.js';
 import { renderAdminArchive } from './admin-archive.js';
 import { renderOrders } from './admin-orders.js';
 import { renderSubscribers } from './admin-subscribers.js';
+import { initNewslettersFeature, renderNewsletters, updateSubscribersCount, resetNewsletterForm } from './admin-newsletters.js';
 import { closeHeroVideoPreviewModal, handleSettingImageUpload } from './admin-settings.js';
+import { hidePreloader } from '../hero/preloader.js';
+import { playHeroVideo } from '../hero/hero.js';
 
 let currentAdminUser = null;
 let currentMaintenanceState = false;
 let orderSubscriptionUnsubscribe = null;
 let dropSettingsSubscriptionUnsubscribe = null;
 let subscribersSubscriptionUnsubscribe = null;
+let newslettersSubscriptionUnsubscribe = null;
 let authMode = 'login';
 let currentGlobalSettings = {};
 
@@ -23,6 +28,7 @@ let elements = {};
 export function initAdminPanel() {
   cacheElements();
   setupEventListeners();
+  initNewslettersFeature();
   
   subscribeAuthState((user) => {
     currentAdminUser = user;
@@ -298,6 +304,7 @@ function updateAdminUIForAuth() {
 }
 
 export function openLoginModal() {
+  hidePreloader(true);
   if (elements.loginOverlay) elements.loginOverlay.classList.add('open');
 }
 
@@ -306,9 +313,13 @@ export function closeLoginModal() {
   if (elements.loginForm) elements.loginForm.reset();
   if (elements.loginError) elements.loginError.textContent = '';
   switchAuthMode('login');
+  if (!currentAdminUser && window.location.pathname.startsWith('/admin')) {
+    history.pushState(null, '', '/');
+  }
 }
 
 export function openAdminPanel() {
+  hidePreloader(true);
   if (!currentAdminUser) {
     openLoginModal();
     return;
@@ -340,6 +351,13 @@ export function openAdminPanel() {
   if (!subscribersSubscriptionUnsubscribe) {
     subscribersSubscriptionUnsubscribe = subscribeSubscribers((subs) => {
       renderSubscribers(subs);
+      updateSubscribersCount(subs);
+    });
+  }
+
+  if (!newslettersSubscriptionUnsubscribe) {
+    newslettersSubscriptionUnsubscribe = subscribeNewsletters((newsletters) => {
+      renderNewsletters(newsletters);
     });
   }
   
@@ -362,6 +380,11 @@ export function closeAdminPanel() {
     subscribersSubscriptionUnsubscribe();
     subscribersSubscriptionUnsubscribe = null;
   }
+  if (newslettersSubscriptionUnsubscribe) {
+    newslettersSubscriptionUnsubscribe();
+    newslettersSubscriptionUnsubscribe = null;
+  }
+  playHeroVideo();
 }
 
 export function switchAdminTab(tab) {
@@ -415,3 +438,4 @@ window.logoutAdmin = () => {
   closeAdminPanel();
 };
 window.switchAdminTab = switchAdminTab;
+window.resetNewsletterForm = resetNewsletterForm;
