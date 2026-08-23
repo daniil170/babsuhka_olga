@@ -115,7 +115,7 @@ export async function sendNewsletterCampaign({ id = null, title, subject, conten
   // 2. Call Vercel API endpoint
   const apiUrl = import.meta.env.VITE_NEWSLETTER_API_URL || '/api/sendNewsletter';
   
-  let responseData;
+  let responseData = null;
   try {
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -130,7 +130,24 @@ export async function sendNewsletterCampaign({ id = null, title, subject, conten
       })
     });
 
-    responseData = await response.json();
+    const rawText = await response.text();
+    try {
+      responseData = rawText ? JSON.parse(rawText) : {};
+    } catch (parseErr) {
+      responseData = null;
+    }
+
+    if (!response.ok) {
+      if (response.status === 405 || response.status === 404) {
+        throw new Error(`Ошибка ${response.status}: API рассылки не найден по адресу ${apiUrl}. Если сайт на Firebase Hosting, укажите полный URL функции Vercel в VITE_NEWSLETTER_API_URL (например: https://ваш-проект.vercel.app/api/sendNewsletter).`);
+      }
+      const apiErrMsg = (responseData && responseData.errors && responseData.errors.join(', ')) || `Ошибка сервера (${response.status}): ${rawText || response.statusText}`;
+      throw new Error(apiErrMsg);
+    }
+
+    if (!responseData) {
+      throw new Error('Пустой или некорректный ответ от API рассылки.');
+    }
   } catch (apiError) {
     console.error('Newsletter API request failed:', apiError);
     // Mark as failed/draft
