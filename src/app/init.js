@@ -2,7 +2,7 @@ import { setupScrollReveal } from '../shared/scroll-animations.js';
 import { setLang, getCurrentLanguage } from '../shared/i18n.js';
 import { toggleMaintenanceOverlay } from '../shared/maintenance.js';
 import { setupRouting, handleRoute } from '../shared/router.js';
-import { initProductGrid } from '../features/catalog/product-grid.js';
+import { initProductGrid, setProductsList, renderCatalog } from '../features/catalog/product-grid.js';
 import { bindCartEvents, updateCartBadge } from '../features/cart/cart-drawer.js';
 import { setupCheckoutForm } from '../features/cart/checkout.js';
 import { loadWishlist, updateWishlistUI } from '../features/favorites/favorites-drawer.js';
@@ -79,8 +79,10 @@ export function initApp() {
     });
 
     subscribeProducts((products) => {
+      setProductsList(products);
+      renderCatalog();
       if (typeof initProductGrid === 'function') {
-        initProductGrid(products);
+        initProductGrid();
       }
       updateWishlistUI();
       if (typeof hidePreloader === 'function') {

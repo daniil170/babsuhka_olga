@@ -57,6 +57,10 @@ export function setupNewsletterModal(renderCartDrawerCallback) {
     });
   }
 
+  // Check initial subscription state and update UI
+  const isAlreadySubscribed = localStorage.getItem('babushka_olga_subscribed_newsletter') === 'true';
+  updateDropSubscriptionUI(isAlreadySubscribed);
+
   // Handle the drop subscription form as well since it's related
   const subscribeForm = document.getElementById('drop-subscribe-form');
   if (subscribeForm) {
@@ -75,6 +79,7 @@ export function setupNewsletterModal(renderCartDrawerCallback) {
             : 'You have successfully subscribed! Welcome discount of 5,000 ₸ is activated! 🤍'
         );
         if (emailInput) emailInput.value = '';
+        updateDropSubscriptionUI(true);
         if (renderCartDrawerCallback) renderCartDrawerCallback(); // refresh cart drawer
       } catch (err) {
         console.error(err);
@@ -82,5 +87,16 @@ export function setupNewsletterModal(renderCartDrawerCallback) {
         showToast(currentLanguage === 'ru' ? 'Ошибка подписки' : 'Subscription error');
       }
     });
+  }
+}
+
+export function updateDropSubscriptionUI(isSubscribed) {
+  const container = document.querySelector('.drop-subscription');
+  if (!container) return;
+  
+  if (isSubscribed) {
+    container.style.display = 'none';
+  } else {
+    container.style.display = 'block';
   }
 }

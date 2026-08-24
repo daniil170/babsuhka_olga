@@ -355,6 +355,7 @@ export function openAdminPanel() {
     openLoginModal();
     return;
   }
+  closeLoginModal();
   if (window.location.pathname !== '/admin') {
     history.pushState(null, '', '/admin');
   }

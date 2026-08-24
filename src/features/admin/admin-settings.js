@@ -22,20 +22,42 @@ export async function saveDropSettingsAdmin() {
   const active = document.getElementById('drop-settings-active').checked;
   const blurCatalog = document.getElementById('drop-settings-blur-catalog')?.checked || false;
   
-  if (!titleRu || !titleEn || !dateStr) {
-    window.showToast('Заполните все параметры таймера');
+  if (active && (!titleRu || !titleEn || !dateStr)) {
+    window.showToast('Для включения таймера заполните название и дату запуска');
     return;
   }
   
   try {
     await saveDropSettings(titleRu, titleEn, dateStr, active, blurCatalog);
-    window.showToast('Настройки дропа успешно сохранены!');
+    if (!active) {
+      window.showToast('Дроп отключен');
+    } else {
+      window.showToast('Настройки дропа успешно сохранены!');
+    }
   } catch (err) {
     console.error(err);
     window.showToast('Ошибка сохранения настроек');
   }
 }
 window.saveDropSettingsAdmin = saveDropSettingsAdmin;
+
+export async function disableDropSettingsAdmin() {
+  const titleRu = document.getElementById('drop-settings-title-ru').value.trim();
+  const titleEn = document.getElementById('drop-settings-title-en').value.trim();
+  const dateStr = document.getElementById('drop-settings-date').value;
+  
+  document.getElementById('drop-settings-active').checked = false;
+  document.getElementById('drop-settings-blur-catalog').checked = false;
+  
+  try {
+    await saveDropSettings(titleRu, titleEn, dateStr, false, false);
+    window.showToast('Дроп отменен и отключен!');
+  } catch (err) {
+    console.error(err);
+    window.showToast('Ошибка при отмене дропа');
+  }
+}
+window.disableDropSettingsAdmin = disableDropSettingsAdmin;
 
 export async function handleSettingImageUpload(event, settingsKey, slotId) {
   const file = event.target.files[0];

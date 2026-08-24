@@ -69,9 +69,14 @@ export function startCountdown(targetDateInput, shouldBlur = false) {
     
     if (distance <= 0) {
       if (countdownInterval) clearInterval(countdownInterval);
-      const section = document.getElementById('drop-countdown-section');
-      if (section) section.style.display = 'none';
-      toggleCatalogBlur(false);
+      const daysEl = document.getElementById('timer-days');
+      const hoursEl = document.getElementById('timer-hours');
+      const minsEl = document.getElementById('timer-minutes');
+      const secsEl = document.getElementById('timer-seconds');
+      if (daysEl) daysEl.textContent = '00';
+      if (hoursEl) hoursEl.textContent = '00';
+      if (minsEl) minsEl.textContent = '00';
+      if (secsEl) secsEl.textContent = '00';
       return;
     }
     
@@ -90,21 +95,24 @@ export function startCountdown(targetDateInput, shouldBlur = false) {
   countdownInterval = setInterval(updateTimer, 1000);
 }
 
+import { updateDropSubscriptionUI } from '../newsletter/newsletter-modal.js';
+
 export function initCountdown(settings, currentLanguage = 'ru') {
   const section = document.getElementById('drop-countdown-section');
   if (!section) return;
   
   const isDropActive = Boolean(settings && settings.active);
   const targetTime = isDropActive ? parseTargetTimestamp(settings.date) : 0;
-  const hasTimeRemaining = isDropActive && targetTime > Date.now();
-
-  if (hasTimeRemaining) {
+  
+  if (isDropActive && targetTime > 0) {
     section.style.display = 'block';
     
-    // Ensure the countdown container is visible immediately even if reveal observer hasn't triggered yet
+    // Make sure section and containers are visible
     const container = section.querySelector('.drop-countdown-container');
     if (container) {
       container.classList.add('visible');
+      container.style.opacity = '1';
+      container.style.transform = 'none';
     }
     
     const titleEl = document.getElementById('drop-countdown-title');
@@ -115,6 +123,9 @@ export function initCountdown(settings, currentLanguage = 'ru') {
     
     startCountdown(settings.date, Boolean(settings.blurCatalog));
     toggleCatalogBlur(Boolean(settings.blurCatalog));
+    
+    const isSubscribed = localStorage.getItem('babushka_olga_subscribed_newsletter') === 'true';
+    updateDropSubscriptionUI(isSubscribed);
   } else {
     section.style.display = 'none';
     if (countdownInterval) {
