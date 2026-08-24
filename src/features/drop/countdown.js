@@ -1,5 +1,23 @@
 let countdownInterval = null;
 
+function parseTargetTimestamp(dateInput) {
+  if (!dateInput) return 0;
+  if (typeof dateInput === 'number') return dateInput;
+  if (dateInput instanceof Date) return dateInput.getTime();
+  
+  const str = String(dateInput).trim();
+  // Standardize YYYY-MM-DDTHH:mm or YYYY-MM-DD HH:mm
+  const normalized = str.replace(' ', 'T');
+  let t = new Date(normalized).getTime();
+  
+  if (isNaN(t)) {
+    // Fallback for Safari if timezone missing
+    t = new Date(str.replace(/-/g, '/')).getTime();
+  }
+  
+  return isNaN(t) ? 0 : t;
+}
+
 export function toggleCatalogBlur(shouldBlur) {
   const productsSection = document.getElementById('products');
   if (!productsSection) return;
@@ -32,17 +50,25 @@ export function toggleCatalogBlur(shouldBlur) {
   }
 }
 
-export function startCountdown(targetDateStr, shouldBlur = false) {
+export function startCountdown(targetDateInput, shouldBlur = false) {
   if (countdownInterval) clearInterval(countdownInterval);
   
-  const targetTime = new Date(targetDateStr).getTime();
+  const targetTime = parseTargetTimestamp(targetDateInput);
+  if (!targetTime) return;
   
+  const daysEl = document.getElementById('timer-days');
+  const hoursEl = document.getElementById('timer-hours');
+  const minsEl = document.getElementById('timer-minutes');
+  const secsEl = document.getElementById('timer-seconds');
+  
+  const pad = (num) => String(Math.max(0, num)).padStart(2, '0');
+
   const updateTimer = () => {
     const now = Date.now();
     const distance = targetTime - now;
     
-    if (distance < 0) {
-      clearInterval(countdownInterval);
+    if (distance <= 0) {
+      if (countdownInterval) clearInterval(countdownInterval);
       const section = document.getElementById('drop-countdown-section');
       if (section) section.style.display = 'none';
       toggleCatalogBlur(false);
@@ -54,13 +80,6 @@ export function startCountdown(targetDateStr, shouldBlur = false) {
     const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((distance % (1000 * 60)) / 1000);
     
-    const pad = (num) => String(num).padStart(2, '0');
-    
-    const daysEl = document.getElementById('timer-days');
-    const hoursEl = document.getElementById('timer-hours');
-    const minsEl = document.getElementById('timer-minutes');
-    const secsEl = document.getElementById('timer-seconds');
-    
     if (daysEl) daysEl.textContent = pad(days);
     if (hoursEl) hoursEl.textContent = pad(hours);
     if (minsEl) minsEl.textContent = pad(minutes);
@@ -71,25 +90,37 @@ export function startCountdown(targetDateStr, shouldBlur = false) {
   countdownInterval = setInterval(updateTimer, 1000);
 }
 
-export function initCountdown(settings, currentLanguage) {
+export function initCountdown(settings, currentLanguage = 'ru') {
   const section = document.getElementById('drop-countdown-section');
   if (!section) return;
   
-  const isDropActive = settings && settings.active;
-  const targetTime = isDropActive ? new Date(settings.date).getTime() : 0;
-  const hasTimeRemaining = !isNaN(targetTime) && targetTime > Date.now();
+  const isDropActive = Boolean(settings && settings.active);
+  const targetTime = isDropActive ? parseTargetTimestamp(settings.date) : 0;
+  const hasTimeRemaining = isDropActive && targetTime > Date.now();
 
-  if (isDropActive && hasTimeRemaining) {
+  if (hasTimeRemaining) {
     section.style.display = 'block';
+    
+    // Ensure the countdown container is visible immediately even if reveal observer hasn't triggered yet
+    const container = section.querySelector('.drop-countdown-container');
+    if (container) {
+      container.classList.add('visible');
+    }
+    
     const titleEl = document.getElementById('drop-countdown-title');
     if (titleEl) {
-      titleEl.textContent = (settings.title && (settings.title[currentLanguage] || settings.title.ru)) || '';
+      const title = (settings.title && (settings.title[currentLanguage] || settings.title.ru || settings.title.en)) || (currentLanguage === 'en' ? 'New Collection' : 'Новая коллекция');
+      titleEl.textContent = title;
     }
-    startCountdown(settings.date, !!settings.blurCatalog);
-    toggleCatalogBlur(!!settings.blurCatalog);
+    
+    startCountdown(settings.date, Boolean(settings.blurCatalog));
+    toggleCatalogBlur(Boolean(settings.blurCatalog));
   } else {
     section.style.display = 'none';
-    if (countdownInterval) clearInterval(countdownInterval);
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
     toggleCatalogBlur(false);
   }
 }

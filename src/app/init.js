@@ -1,5 +1,5 @@
 import { setupScrollReveal } from '../shared/scroll-animations.js';
-import { setLang } from '../shared/i18n.js';
+import { setLang, getCurrentLanguage } from '../shared/i18n.js';
 import { toggleMaintenanceOverlay } from '../shared/maintenance.js';
 import { setupRouting, handleRoute } from '../shared/router.js';
 import { initProductGrid } from '../features/catalog/product-grid.js';
@@ -88,9 +88,18 @@ export function initApp() {
       }
     });
 
+    let latestDropSettings = null;
+
     subscribeDropSettings((settings) => {
+      latestDropSettings = settings;
       if (typeof initCountdown === 'function') {
-        initCountdown(settings);
+        initCountdown(settings, getCurrentLanguage());
+      }
+    });
+
+    window.addEventListener('language-changed', (e) => {
+      if (latestDropSettings && typeof initCountdown === 'function') {
+        initCountdown(latestDropSettings, e.detail || getCurrentLanguage());
       }
     });
 
