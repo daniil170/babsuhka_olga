@@ -98,11 +98,12 @@ export async function updateGlobalSettings(data) {
   }
 }
 
-export async function saveDropSettings(titleRu, titleEn, dateStr, active) {
+export async function saveDropSettings(titleRu, titleEn, dateStr, active, blurCatalog = false) {
   const data = {
     title: { ru: titleRu, en: titleEn },
     date: dateStr,
     active: active,
+    blurCatalog: blurCatalog,
     updatedAt: new Date().toISOString()
   };
   if (db) {
@@ -119,15 +120,15 @@ export function subscribeDropSettings(callback) {
       if (docSnap.exists()) {
         callback(docSnap.data());
       } else {
-        callback({ title: { ru: '', en: '' }, date: '', active: false });
+        callback({ title: { ru: '', en: '' }, date: '', active: false, blurCatalog: false });
       }
     }, (error) => {
       console.error('Firestore drop settings subscription error:', error);
-      callback({ title: { ru: '', en: '' }, date: '', active: false });
+      callback({ title: { ru: '', en: '' }, date: '', active: false, blurCatalog: false });
     });
   } else {
     dropSettingsListeners.push(callback);
-    const getLocalSettings = () => JSON.parse(localStorage.getItem(MOCK_DROP_SETTINGS_KEY)) || { title: { ru: '', en: '' }, date: '', active: false };
+    const getLocalSettings = () => JSON.parse(localStorage.getItem(MOCK_DROP_SETTINGS_KEY)) || { title: { ru: '', en: '' }, date: '', active: false, blurCatalog: false };
     callback(getLocalSettings());
     return () => {
       const index = dropSettingsListeners.indexOf(callback);

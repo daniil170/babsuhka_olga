@@ -132,6 +132,7 @@ function cacheElements() {
     dropTitleEn: document.getElementById('drop-settings-title-en'),
     dropDate: document.getElementById('drop-settings-date'),
     dropActive: document.getElementById('drop-settings-active'),
+    dropBlurCatalog: document.getElementById('drop-settings-blur-catalog'),
   };
 }
 
@@ -258,15 +259,41 @@ function setupEventListeners() {
 
   if (elements.heroVideoPreviewBtn) {
     elements.heroVideoPreviewBtn.onclick = () => {
-      if (elements.heroVideoPreviewPlayer && currentGlobalSettings.heroVideoUrl) {
-        elements.heroVideoPreviewPlayer.src = currentGlobalSettings.heroVideoUrl;
-        elements.heroVideoPreviewPlayer.load();
-        elements.heroVideoPreviewPlayer.play().catch(err => {
-          console.warn('Preview video play blocked or failed:', err);
-        });
+      const player = elements.heroVideoPreviewPlayer;
+      const videoUrl = currentGlobalSettings.heroVideoUrl;
+
+      if (!videoUrl) {
+        window.showToast('Hero-видео еще не загружено');
+        return;
       }
+
       if (elements.heroVideoPreviewModal) {
         elements.heroVideoPreviewModal.classList.add('open');
+      }
+
+      if (player) {
+        player.muted = true;
+        player.defaultMuted = true;
+        player.playsInline = true;
+        player.setAttribute('muted', '');
+        player.setAttribute('playsinline', '');
+
+        const startPlay = () => {
+          const p = player.play();
+          if (p !== undefined) {
+            p.catch(err => {
+              console.info('Preview video playback deferred:', err.message);
+            });
+          }
+        };
+
+        if (player.src !== videoUrl) {
+          player.src = videoUrl;
+          player.addEventListener('loadeddata', startPlay, { once: true });
+          player.load();
+        } else {
+          startPlay();
+        }
       }
     };
   }
@@ -350,6 +377,7 @@ export function openAdminPanel() {
         if (elements.dropTitleEn) elements.dropTitleEn.value = settings.title?.en || '';
         if (elements.dropDate) elements.dropDate.value = settings.date || '';
         if (elements.dropActive) elements.dropActive.checked = !!settings.active;
+        if (elements.dropBlurCatalog) elements.dropBlurCatalog.checked = !!settings.blurCatalog;
       }
     });
   }

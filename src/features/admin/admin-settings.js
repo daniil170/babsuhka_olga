@@ -9,7 +9,8 @@ export function closeHeroVideoPreviewModal() {
   }
   if (player) {
     player.pause();
-    player.src = '';
+    player.removeAttribute('src');
+    player.load();
   }
 }
 window.closeHeroVideoPreviewModal = closeHeroVideoPreviewModal;
@@ -19,6 +20,7 @@ export async function saveDropSettingsAdmin() {
   const titleEn = document.getElementById('drop-settings-title-en').value.trim();
   const dateStr = document.getElementById('drop-settings-date').value;
   const active = document.getElementById('drop-settings-active').checked;
+  const blurCatalog = document.getElementById('drop-settings-blur-catalog')?.checked || false;
   
   if (!titleRu || !titleEn || !dateStr) {
     window.showToast('Заполните все параметры таймера');
@@ -26,7 +28,7 @@ export async function saveDropSettingsAdmin() {
   }
   
   try {
-    await saveDropSettings(titleRu, titleEn, dateStr, active);
+    await saveDropSettings(titleRu, titleEn, dateStr, active, blurCatalog);
     window.showToast('Настройки дропа успешно сохранены!');
   } catch (err) {
     console.error(err);

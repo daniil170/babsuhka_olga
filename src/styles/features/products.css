@@ -1,7 +1,11 @@
 /* ── PRODUCTS ── */
-.products { background: var(--beige); }
+.products {
+  background: var(--beige);
+  position: relative;
+}
 .products-filters {
   display: flex; gap: 8px; margin-bottom: 48px; flex-wrap: wrap; align-items: center;
+  transition: filter 0.6s ease, opacity 0.6s ease;
 }
 .filter-btn {
   padding: 8px 20px; font-size: 12px; font-weight: 400; letter-spacing: 0.1em;
@@ -11,6 +15,7 @@
 .filter-btn.active { background: var(--dark); color: var(--white); border-color: var(--dark); }
 .products-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+  transition: filter 0.6s ease, opacity 0.6s ease;
 }
 .product-card {
   background: var(--white); cursor: pointer; transition: transform var(--transition);
@@ -79,6 +84,71 @@
   font-weight: 300;
 }
 
+/* ── DROP BLUR EFFECT ON CATALOG ── */
+.products.drop-blurred .products-grid,
+.products.drop-blurred .products-filters {
+  filter: blur(12px);
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.45;
+  transition: filter 0.6s ease, opacity 0.6s ease;
+}
+
+.products-drop-blur-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background: rgba(245, 240, 232, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.blur-overlay-card {
+  background: rgba(253, 250, 246, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--beige-accent);
+  padding: 44px 36px;
+  text-align: center;
+  max-width: 520px;
+  width: 90%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  animation: modalIn 0.4s ease;
+}
+
+.blur-lock-icon {
+  font-size: 36px;
+  margin-bottom: 16px;
+}
+
+.blur-overlay-title {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3.5vw, 30px);
+  font-weight: 400;
+  color: var(--dark);
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.blur-overlay-sub {
+  font-size: 14px;
+  color: var(--brown);
+  line-height: 1.6;
+  margin-bottom: 28px;
+  font-weight: 300;
+}
+
+.blur-scroll-btn {
+  font-size: 11px;
+  padding: 14px 32px;
+  letter-spacing: 0.18em;
+}
+
 @media (max-width: 1024px) {
   .products-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -88,6 +158,7 @@
   .product-card-images { height: 320px; }
   .products-filters { gap: 6px; }
   .filter-btn { padding: 7px 14px; font-size: 11px; }
+  .blur-overlay-card { padding: 32px 20px; }
 }
 
 @media (max-width: 380px) {

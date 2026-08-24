@@ -917,15 +917,37 @@
           </tbody>
         </table>
       </div>
+
+      <!-- SUBSCRIBERS TABLE -->
+      <div class="admin-products-header" style="margin-top: 48px;">
+        <div>
+          <h2>База подписчиков</h2>
+          <span style="font-size:12px; color:var(--brown);">Список всех клиентов, подписавшихся на рассылку и уведомления</span>
+        </div>
+        <button class="btn-add" onclick="exportSubscribersCSV()">Экспорт в CSV</button>
+      </div>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Дата подписки</th>
+            </tr>
+          </thead>
+          <tbody id="admin-subscribers-tbody">
+            <!-- Dynamic subscribers list -->
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- SETTINGS TAB -->
     <div class="admin-section" id="admin-settings">
       <div class="admin-products-header">
-        <h2>Настройки дропа и подписки</h2>
+        <h2>Настройки обратного отсчета (Дроп)</h2>
       </div>
       <div class="admin-form" style="max-width: 800px; margin-bottom: 30px; border: 1px solid var(--beige-mid);">
-        <h3>Параметры обратного отсчета</h3>
+        <h3>Параметры дропа и каталога</h3>
         <div class="form-row">
           <div class="form-group">
             <label>Название дропа (рус)</label>
@@ -942,10 +964,13 @@
             <input type="datetime-local" id="drop-settings-date">
           </div>
           <div class="form-group">
-            <label>Статус таймера</label>
-            <div style="display: flex; gap: 16px; align-items: center; margin-top: 10px;">
+            <label>Режим дропа</label>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
               <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer; text-transform: none; color: var(--dark);">
-                <input type="checkbox" id="drop-settings-active" style="width: auto;"> Включить таймер на сайте
+                <input type="checkbox" id="drop-settings-active" style="width: auto;"> ⏱️ Включить таймер на сайте
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer; text-transform: none; color: var(--dark);">
+                <input type="checkbox" id="drop-settings-blur-catalog" style="width: auto;"> 🔒 Размывать каталог товаров до старта дропа
               </label>
             </div>
           </div>
@@ -953,50 +978,6 @@
         <div class="form-actions" style="margin-top: 20px;">
           <button class="btn-save" onclick="saveDropSettingsAdmin()">Сохранить настройки</button>
         </div>
-      </div>
-
-      <div class="admin-form" style="max-width: 800px; margin-bottom: 30px; border: 1px solid var(--beige-mid);">
-        <h3>Изображения (Медиа)</h3>
-        <div class="form-row" style="grid-template-columns: repeat(2, 1fr); gap: 20px;">
-          <div class="form-group">
-            <label>Логотип бренда (Hero Logo)</label>
-            <div class="media-slot" id="media-slot-logo-hero" style="max-width: 100%; aspect-ratio: 3/1; height: auto;">
-              <span class="media-slot-icon">➕</span>
-              <span class="media-slot-label">Загрузить логотип</span>
-              <img class="media-slot-preview" style="display:none; object-fit: contain; width: 100%; height: 100%;" />
-              <input type="file" id="upload-logo-hero" accept="image/*">
-              <div class="media-slot-progress" style="width: 0%"></div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Бабушка Ольга за работой (Brand Story)</label>
-            <div class="media-slot" id="media-slot-brand-story" style="max-width: 100%; aspect-ratio: 1/1; height: auto;">
-              <span class="media-slot-icon">➕</span>
-              <span class="media-slot-label">Загрузить картинку</span>
-              <img class="media-slot-preview" style="display:none; object-fit: cover; width: 100%; height: 100%;" />
-              <input type="file" id="upload-brand-story" accept="image/*">
-              <div class="media-slot-progress" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="admin-products-header" style="margin-top: 40px;">
-        <h2>База подписчиков</h2>
-        <button class="btn-add" onclick="exportSubscribersCSV()">Экспорт в CSV</button>
-      </div>
-      <div class="table-responsive">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Дата подписки</th>
-            </tr>
-          </thead>
-          <tbody id="admin-subscribers-tbody">
-            <!-- Dynamic subscribers list -->
-          </tbody>
-        </table>
       </div>
     </div>
   </div>

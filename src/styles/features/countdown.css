@@ -3,58 +3,73 @@
   background: var(--white);
   border-bottom: 1px solid var(--beige-mid);
   text-align: center;
-  padding: 80px 48px;
+  padding: 90px 48px;
 }
 .drop-countdown-container {
-  max-width: 800px;
+  max-width: 860px;
   margin: 0 auto;
 }
 .drop-title {
   font-family: var(--font-display);
-  font-size: clamp(32px, 4.5vw, 52px);
+  font-size: clamp(32px, 4.5vw, 54px);
   font-weight: 300;
   color: var(--dark);
-  margin-bottom: 40px;
+  margin-bottom: 44px;
   letter-spacing: -0.01em;
 }
 .countdown-timer {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin-bottom: 48px;
+  gap: 14px;
+  margin-bottom: 52px;
 }
 .timer-segment {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 80px;
+  justify-content: center;
+  min-width: 105px;
+  padding: 24px 16px 20px;
+  background: #FAF6EE;
+  border: 1px solid rgba(200, 184, 154, 0.5);
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(107, 94, 78, 0.07);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.timer-segment:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(107, 94, 78, 0.1);
 }
 .timer-num {
   font-family: var(--font-display);
-  font-size: clamp(48px, 6vw, 72px);
+  font-size: clamp(46px, 5.5vw, 70px);
   font-weight: 300;
   color: var(--dark);
   line-height: 1;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
 }
 .timer-label {
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.15em;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--brown);
-  margin-top: 8px;
+  margin-top: 10px;
 }
 .timer-divider {
   font-family: var(--font-display);
-  font-size: clamp(40px, 5vw, 64px);
+  font-size: clamp(24px, 3.5vw, 36px);
   font-weight: 300;
   color: var(--beige-accent);
   line-height: 1;
-  padding-bottom: 24px;
+  padding-bottom: 16px;
+  opacity: 0.8;
 }
 .drop-subscription {
-  max-width: 500px;
+  max-width: 520px;
   margin: 0 auto;
 }
 .drop-subscription p {
@@ -87,16 +102,30 @@
   white-space: nowrap;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   .drop-countdown {
     padding: 60px 20px;
   }
   .countdown-timer {
-    gap: 8px;
-    margin-bottom: 32px;
+    gap: 6px;
+    margin-bottom: 36px;
   }
   .timer-segment {
-    min-width: 60px;
+    min-width: 68px;
+    padding: 16px 8px 12px;
+    border-radius: 10px;
+  }
+  .timer-num {
+    font-size: 32px;
+  }
+  .timer-label {
+    font-size: 8px;
+    letter-spacing: 0.12em;
+    margin-top: 6px;
+  }
+  .timer-divider {
+    font-size: 20px;
+    padding-bottom: 10px;
   }
   .subscribe-form {
     flex-direction: column;
