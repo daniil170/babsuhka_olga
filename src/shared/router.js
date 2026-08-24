@@ -46,11 +46,7 @@ export function handleRoute(path, smooth = true, isAdminLoggedIn, onFilterChange
   } else if (path.startsWith('/unsubscribe')) {
     openUnsubscribeModal();
   } else if (path.startsWith('/admin')) {
-    if (isAdminLoggedIn) {
-      openAdminPanel();
-    } else {
-      openLoginModal();
-    }
+    openAdminPanel();
   } else if (path === '/' || path === '') {
     const target = document.getElementById('home');
     if (target) target.scrollIntoView({ behavior: scrollBehavior });

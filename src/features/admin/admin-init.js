@@ -355,6 +355,9 @@ export function openAdminPanel() {
     openLoginModal();
     return;
   }
+  if (window.location.pathname !== '/admin') {
+    history.pushState(null, '', '/admin');
+  }
   document.body.classList.add('admin-mode');
   document.querySelector('.bottom-widgets')?.classList.add('hidden');
   if (elements.adminPanel) elements.adminPanel.classList.add('open');
@@ -404,6 +407,10 @@ export function closeAdminPanel() {
   if (elements.adminPanel) elements.adminPanel.classList.remove('open');
   document.body.style.overflow = '';
   
+  if (window.location.pathname.startsWith('/admin')) {
+    history.pushState(null, '', '/');
+  }
+  
   if (orderSubscriptionUnsubscribe) {
     orderSubscriptionUnsubscribe();
     orderSubscriptionUnsubscribe = null;
@@ -417,7 +424,6 @@ export function closeAdminPanel() {
     subscribersSubscriptionUnsubscribe = null;
   }
   if (newslettersSubscriptionUnsubscribe) {
-    newslettersSubscriptionUnsubscribe();
     newslettersSubscriptionUnsubscribe = null;
   }
   playHeroVideo();
